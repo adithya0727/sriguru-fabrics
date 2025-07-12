@@ -82,9 +82,6 @@ const Products = () => {
                 <p className="text-gray-600 mb-4 text-sm">{category.description}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold text-red-600">{category.priceRange}</span>
-                  <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                    📞 Call Now
-                  </button>
                 </div>
               </div>
             </div>
@@ -96,11 +93,11 @@ const Products = () => {
           <h3 className="text-2xl font-bold text-red-800 mb-4">Ready to Find Your Perfect Saree?</h3>
           <p className="text-gray-600 mb-6">Contact us to discuss your requirements and get personalized recommendations</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="tel:+919902963167" className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors hover-scale">
-              📞 Call: +91 9902963167
-            </a>
-            <a href="tel:+919663733683" className="border-2 border-red-600 text-red-600 px-8 py-3 rounded-lg hover:bg-red-600 hover:text-white transition-colors hover-scale">
+            <a href="tel:+919663733683" className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors hover-scale">
               📞 Call: +91 9663733683
+            </a>
+            <a href="tel:+919448129415" className="border-2 border-red-600 text-red-600 px-8 py-3 rounded-lg hover:bg-red-600 hover:text-white transition-colors hover-scale">
+              📞 Call: +91 9448129415
             </a>
           </div>
         </div>
