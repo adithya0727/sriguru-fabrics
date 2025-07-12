@@ -35,6 +35,56 @@ const Products = () => {
     }
   ];
 
+  // Sample saree data with images and prices
+  const sareeProducts = {
+    gadwal: [
+      {
+        id: 'g1',
+        name: 'Traditional Gadwal Silk',
+        price: '₹1,300',
+        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.49.24_inovlc.jpg',
+        description: 'Handwoven with traditional motifs'
+      }
+    ],
+    ilkal: [
+      {
+        id: 'i1',
+        name: 'Classic Ilkal Saree',
+        price: '₹1,500',
+        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317695/WhatsApp_Image_2025-07-12_at_15.51.41_awgzk2.jpg',
+        description: 'Traditional Karnataka weave'
+      }
+    ],
+    fancy: [
+      {
+        id: 'f1',
+        name: 'Designer Party Saree',
+        price: '₹1,400',
+        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317700/WhatsApp_Image_2025-07-12_at_15.49.23_bm3yzc.jpg',
+        description: 'Perfect for special occasions'
+      }
+    ],
+    'soft-silk': [
+      {
+        id: 's1',
+        name: 'Pure Soft Silk',
+        price: '₹1,500',
+        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.51.42_f5ig6v.jpg',
+        description: 'Luxurious soft silk texture'
+      }
+    ]
+  };
+
+  // Get filtered products
+  const getFilteredProducts = () => {
+    if (selectedCategory === 'all') {
+      return Object.values(sareeProducts).flat();
+    }
+    return sareeProducts[selectedCategory] || [];
+  };
+
+  const filteredProducts = getFilteredProducts();
+
   return (
     <div className="bg-gray-50 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,7 +101,7 @@ const Products = () => {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 hover-scale ${
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                   selectedCategory === category.id
                     ? 'bg-red-600 text-white shadow-lg'
                     : 'bg-white text-red-600 border-2 border-red-600 hover:bg-red-50'
@@ -65,38 +115,49 @@ const Products = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sareeCategories.slice(1).map((category) => (
-            <div key={category.id} className={`bg-white rounded-xl shadow-lg overflow-hidden hover-scale transition-all duration-300 ${
-              selectedCategory !== 'all' && selectedCategory !== category.id ? 'opacity-50' : ''
-            }`}>
-              <div className="h-64 bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">{category.emoji}</div>
-                  <p className="text-red-700 font-semibold">{category.label} Sarees</p>
-                  <p className="text-sm text-gray-600">Premium Quality Collection</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-xl">
+              <div className="relative">
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="w-full h-80 object-cover"
+                />
+                <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                  {product.price}
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-red-800 mb-2">{category.label} Sarees</h3>
-                <p className="text-gray-600 mb-4 text-sm">{category.description}</p>
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-red-800 mb-2">{product.name}</h3>
+                <p className="text-gray-600 text-sm mb-3">{product.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-red-600">{category.priceRange}</span>
+                  <span className="text-xl font-bold text-red-600">{product.price}</span>
+                  <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Show message if no products found */}
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No products found for the selected category.</p>
+          </div>
+        )}
+
         {/* Call to Action */}
         <div className="mt-16 text-center bg-white rounded-2xl shadow-xl p-8">
           <h3 className="text-2xl font-bold text-red-800 mb-4">Ready to Find Your Perfect Saree?</h3>
           <p className="text-gray-600 mb-6">Contact us to discuss your requirements and get personalized recommendations</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="tel:+919663733683" className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors hover-scale">
+            <a href="tel:+919663733683" className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition-colors hover:scale-105">
               📞 Call: +91 9663733683
             </a>
-            <a href="tel:+919448129415" className="border-2 border-red-600 text-red-600 px-8 py-3 rounded-lg hover:bg-red-600 hover:text-white transition-colors hover-scale">
+            <a href="tel:+919448129415" className="border-2 border-red-600 text-red-600 px-8 py-3 rounded-lg hover:bg-red-600 hover:text-white transition-colors hover:scale-105">
               📞 Call: +91 9448129415
             </a>
           </div>
