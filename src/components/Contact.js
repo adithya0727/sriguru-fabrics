@@ -9,7 +9,7 @@ const Contact = () => {
   });
 
   const contacts = [
-    { name: "V Balagopal", phone: "+91 9902963167", emoji: "👨‍💼" },
+    { name: "V Balagopal", phone: "+91 9448129415", emoji: "👨‍💼" },
     { name: "Sandhya B", phone: "+91 9663733683", emoji: "👩‍💼" },
     { name: "Rama Sudhakar", phone: "+91 9980016054", emoji: "👨‍💼" }
   ];
@@ -25,7 +25,7 @@ const Contact = () => {
     e.preventDefault();
     // Create WhatsApp message
     const message = `Hello! I'm interested in your sarees.\n\nName: ${formData.name}\nPhone: ${formData.phone}\nSaree Type: ${formData.sareeType}\nMessage: ${formData.message}`;
-    const whatsappUrl = `https://wa.me/919902963167?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/919663733683?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -178,7 +178,7 @@ const Contact = () => {
             <div className="text-center">
               <div className="text-4xl mb-4">🏆</div>
               <h4 className="font-semibold text-red-700 mb-2">15+ Years Experience</h4>
-              <p className="text-gray-600">Trusted by 200+ customers across Karnataka</p>
+              <p className="text-gray-600">Trusted by 500+ customers across Karnataka</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">💝</div>
