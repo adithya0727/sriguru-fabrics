@@ -75,7 +75,7 @@ const Testimonials = () => {
           <h3 className="text-2xl font-bold text-red-800 mb-4">Join Our Happy Customers</h3>
           <p className="text-gray-600 mb-6">Experience the quality and service that has made us a trusted name for 15+ years</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="tel:+919902963167" className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors hover-scale">
+            <a href="tel:+919663733683" className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors hover-scale">
               📞 Call Now
             </a>
             <a href="#contact" className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-lg hover:bg-red-600 hover:text-white transition-colors hover-scale">
