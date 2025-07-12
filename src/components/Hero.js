@@ -55,7 +55,7 @@ const Hero = ({ scrollToSection }) => {
           </div>
           <div className="text-center bg-white p-8 rounded-xl shadow-lg slide-up">
             <div className="text-4xl mb-4">👥</div>
-            <div className="text-3xl font-bold text-red-800">200+</div>
+            <div className="text-3xl font-bold text-red-800">500+</div>
             <div className="text-red-600 font-semibold">Happy Customers</div>
           </div>
           <div className="text-center bg-white p-8 rounded-xl shadow-lg slide-up">
