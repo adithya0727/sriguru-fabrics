@@ -152,9 +152,13 @@ const Contact = () => {
 
               <button
                 type="submit"
-                className="w-full bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors transform hover:scale-105 font-medium"
+                className="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition-all duration-300 transform hover:scale-105 font-bold text-lg shadow-lg border-2 border-green-500 hover:shadow-xl"
               >
-                💬 Send via WhatsApp
+                <span className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">📱</span>
+                  Send via WhatsApp
+                  <span className="text-2xl">💬</span>
+                </span>
               </button>
             </form>
 
