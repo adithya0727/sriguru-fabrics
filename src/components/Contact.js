@@ -60,7 +60,10 @@ const Contact = () => {
                     <span className="text-xl">{contact.emoji}</span>
                     <div>
                       <p className="font-medium text-red-700">{contact.name}</p>
-                      <a href={`tel:${contact.phone}`} className="text-gray-600 hover:text-red-600 transition-colors">
+                      <a 
+                        href={`tel:${contact.phone}`} 
+                        className="text-gray-600 hover:text-red-600 transition-colors"
+                      >
                         {contact.phone}
                       </a>
                     </div>
@@ -85,4 +88,108 @@ const Contact = () => {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                  placeholder="Your full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                  placeholder="Your phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Saree Type Interest
+                </label>
+                <select
+                  name="sareeType"
+                  value={formData.sareeType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                >
+                  <option value="">Select saree type</option>
+                  <option value="Gadwal Sarees">Gadwal Sarees</option>
+                  <option value="Ilkal Sarees">Ilkal Sarees</option>
+                  <option value="Fancy Sarees">Fancy Sarees</option>
+                  <option value="Soft Silk Sarees">Soft Silk Sarees</option>
+                  <option value="All Types">All Types</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Message
+                </label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                  placeholder="Tell us about your requirements, preferred colors, occasion, or any specific questions..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 transition-colors transform hover:scale-105 font-medium"
+              >
+                💬 Send via WhatsApp
+              </button>
+            </form>
+
+            <div className="mt-6 p-4 bg-green-50 rounded-lg">
+              <p className="text-sm text-green-800">
+                <strong>📱 Quick Connect:</strong> Your message will open WhatsApp for instant communication with our team!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold text-red-800 text-center mb-6">Why Choose Us?</h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-4xl mb-4">⚡</div>
+              <h4 className="font-semibold text-red-700 mb-2">Quick Response</h4>
+              <p className="text-gray-600">We respond to all inquiries within 2 hours during business hours</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-4">🏆</div>
+              <h4 className="font-semibold text-red-700 mb-2">15+ Years Experience</h4>
+              <p className="text-gray-600">Trusted by 200+ customers across Karnataka</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-4">💝</div>
+              <h4 className="font-semibold text-red-700 mb-2">Personal Service</h4>
+              <p className="text-gray-600">Each customer receives personalized attention and care</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Contact;
