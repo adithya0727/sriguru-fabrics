@@ -35,7 +35,7 @@ const About = () => {
               </p>
               <p className="text-gray-700 leading-relaxed">
                 This understanding has shaped how we source our sarees, price them fairly, and serve each customer with the 
-                personal attention they deserve. Our 200+ satisfied customers are not just buyers - they're part of our extended family.
+                personal attention they deserve. Our 500+ satisfied customers are not just buyers - they're part of our extended family.
               </p>
             </div>
 
