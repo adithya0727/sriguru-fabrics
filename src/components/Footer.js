@@ -171,28 +171,29 @@ const Footer = () => {
           </div>
         </div>
       </div>
-{/* Floating WhatsApp Button */}
-<div style={{position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999}}>
-  
-    href="https://wa.me/919663733683?text=Hello! I'm interested in your sarees."
-    target="_blank"
-    rel="noopener noreferrer"
-    className="bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition-all duration-300"
-    title="Chat with us on WhatsApp"
-    style={{
-      display: 'block',
-      width: '50px',
-      height: '50px',
-      padding: '10px',
-      textAlign: 'center',
-      lineHeight: '30px'
-    }}
-  >
-    <svg style={{width: '30px', height: '30px', verticalAlign: 'middle'}} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 2.079.549 4.03 1.592 5.71L0 24l6.573-1.727a11.9 11.9 0 005.444 1.344c6.621 0 11.988-5.367 11.988-11.987C23.971 5.367 18.638.029 12.017 0zm.058 21.925h-.004a9.94 9.94 0 01-5.068-1.388L5.35 19.49l-3.177.833.85-3.102-1.083-1.652a9.935 9.935 0 01-1.517-5.582c0-5.496 4.477-9.973 9.973-9.973 2.663 0 5.168 1.038 7.055 2.925 1.887 1.887 2.925 4.392 2.925 7.055-.004 5.496-4.481 9.973-9.978 9.973z"/>
-    </svg>
-  </a>
-</div>
+
+      {/* Floating WhatsApp Button */}
+      <div style={{position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999}}>
+        <a
+          href="https://wa.me/919663733683?text=Hello! I'm interested in your sarees."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg transition-all duration-300"
+          title="Chat with us on WhatsApp"
+          style={{
+            display: 'block',
+            width: '50px',
+            height: '50px',
+            padding: '10px',
+            textAlign: 'center',
+            lineHeight: '30px'
+          }}
+        >
+          <svg style={{width: '30px', height: '30px', verticalAlign: 'middle'}} fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 2.079.549 4.03 1.592 5.71L0 24l6.573-1.727a11.9 11.9 0 005.444 1.344c6.621 0 11.988-5.367 11.988-11.987C23.971 5.367 18.638.029 12.017 0zm.058 21.925h-.004a9.94 9.94 0 01-5.068-1.388L5.35 19.49l-3.177.833.85-3.102-1.083-1.652a9.935 9.935 0 01-1.517-5.582c0-5.496 4.477-9.973 9.973-9.973 2.663 0 5.168 1.038 7.055 2.925 1.887 1.887 2.925 4.392 2.925 7.055-.004 5.496-4.481 9.973-9.978 9.973z"/>
+          </svg>
+        </a>
+      </div>
     </footer>
   );
 };
