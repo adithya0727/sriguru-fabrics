@@ -43,7 +43,8 @@ const Products = () => {
         name: 'Traditional Gadwal Silk',
         price: '₹1,300',
         image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.49.24_inovlc.jpg',
-        description: 'Handwoven with traditional motifs'
+        description: 'Handwoven with traditional motifs',
+        blouse: 'with blouse'
       }
     ],
     ilkal: [
@@ -52,7 +53,8 @@ const Products = () => {
         name: 'Classic Ilkal Saree',
         price: '₹1,500',
         image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317695/WhatsApp_Image_2025-07-12_at_15.51.41_awgzk2.jpg',
-        description: 'Traditional Karnataka weave'
+        description: 'Traditional Karnataka weave',
+        blouse: 'without blouse'
       }
     ],
     fancy: [
@@ -61,7 +63,8 @@ const Products = () => {
         name: 'Designer Party Saree',
         price: '₹1,400',
         image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317700/WhatsApp_Image_2025-07-12_at_15.49.23_bm3yzc.jpg',
-        description: 'Perfect for special occasions'
+        description: 'Perfect for special occasions',
+        blouse: 'with blouse'
       }
     ],
     'soft-silk': [
@@ -70,7 +73,8 @@ const Products = () => {
         name: 'Pure Soft Silk',
         price: '₹1,500',
         image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.51.42_f5ig6v.jpg',
-        description: 'Luxurious soft silk texture'
+        description: 'Luxurious soft silk texture',
+        blouse: 'with blouse'
       }
     ]
   };
@@ -133,9 +137,13 @@ const Products = () => {
                 <p className="text-gray-600 text-sm mb-3">{product.description}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-xl font-bold text-red-600">{product.price}</span>
-                  <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
-                    View Details
-                  </button>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    product.blouse === 'with blouse' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-orange-100 text-orange-800'
+                  }`}>
+                    {product.blouse}
+                  </span>
                 </div>
               </div>
             </div>
