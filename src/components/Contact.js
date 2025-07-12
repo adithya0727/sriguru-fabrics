@@ -9,8 +9,8 @@ const Contact = () => {
   });
 
   const contacts = [
-    { name: "V Balagopal", phone: "+91 9448129415", emoji: "👨‍💼" },
     { name: "Sandhya B", phone: "+91 9663733683", emoji: "👩‍💼" },
+    { name: "V Balagopal", phone: "+91 9448129415", emoji: "👨‍💼" },
     { name: "Rama Sudhakar", phone: "+91 9980016054", emoji: "👨‍💼" }
   ];
 
