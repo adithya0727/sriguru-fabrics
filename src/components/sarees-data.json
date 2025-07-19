@@ -1,1 +1,44 @@
-
+{
+  "categories": [
+    { "id": "all", "label": "All Categories" },
+    { "id": "silk", "label": "Silk Sarees" },
+    { "id": "cotton", "label": "Cotton Sarees" },
+    { "id": "georgette", "label": "Georgette Sarees" },
+    { "id": "chiffon", "label": "Chiffon Sarees" }
+  ],
+  "sarees": [
+    {
+      "id": "saree-1",
+      "name": "Royal Silk Saree",
+      "description": "Elegant royal blue silk saree with golden zari work",
+      "price": 1500,
+      "category": "silk",
+      "image": "https://example.com/saree1.jpg",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": ["silk", "royal", "wedding", "golden zari"]
+    },
+    {
+      "id": "saree-2",
+      "name": "Cotton Handloom Saree",
+      "description": "Traditional cotton handloom saree with block prints",
+      "price": 800,
+      "category": "cotton",
+      "image": "https://example.com/saree2.jpg",
+      "inStock": true,
+      "blouse": "without blouse",
+      "tags": ["cotton", "handloom", "traditional", "block print"]
+    },
+    {
+      "id": "saree-3",
+      "name": "Designer Georgette Saree",
+      "description": "Modern georgette saree with embroidery work",
+      "price": 2200,
+      "category": "georgette",
+      "image": "https://example.com/saree3.jpg",
+      "inStock": false,
+      "blouse": "with blouse",
+      "tags": ["georgette", "designer", "embroidery", "modern"]
+    }
+  ]
+}
