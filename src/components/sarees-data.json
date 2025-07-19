@@ -1,10 +1,10 @@
 {
   "categories": [
     { "id": "all", "label": "All Categories" },
-    { "id": "silk", "label": "Silk Sarees" },
-    { "id": "cotton", "label": "Cotton Sarees" },
-    { "id": "georgette", "label": "Georgette Sarees" },
-    { "id": "chiffon", "label": "Chiffon Sarees" }
+    { "id": "Gadwal", "label": "Gadwal Sarees" },
+    { "id": "Ilkal", "label": "Ilkal Sarees" },
+    { "id": "Fancy", "label": "Fancy Sarees" },
+    { "id": "Soft Silk", "label": "Soft Silk Sarees" }
   ],
   "sarees": [
     {
@@ -12,7 +12,7 @@
       "name": "Royal Silk Saree",
       "description": "Elegant royal blue silk saree with golden zari work",
       "price": 1500,
-      "category": "silk",
+      "category": "Gadwal",
       "image": "https://example.com/saree1.jpg",
       "inStock": true,
       "blouse": "with blouse",
@@ -23,7 +23,7 @@
       "name": "Cotton Handloom Saree",
       "description": "Traditional cotton handloom saree with block prints",
       "price": 800,
-      "category": "cotton",
+      "category": "Ilkal",
       "image": "https://example.com/saree2.jpg",
       "inStock": true,
       "blouse": "without blouse",
@@ -34,7 +34,7 @@
       "name": "Designer Georgette Saree",
       "description": "Modern georgette saree with embroidery work",
       "price": 2200,
-      "category": "georgette",
+      "category": "Fancy",
       "image": "https://example.com/saree3.jpg",
       "inStock": false,
       "blouse": "with blouse",
