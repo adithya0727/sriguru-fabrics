@@ -36,7 +36,7 @@
       "price": 2200,
       "category": "Fancy",
       "image": "https://example.com/saree3.jpg",
-      "inStock": false,
+      "inStock": true,
       "blouse": "with blouse",
       "tags": ["georgette", "designer", "embroidery", "modern"]
     }
