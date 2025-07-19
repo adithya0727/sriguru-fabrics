@@ -1,112 +1,45 @@
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Grid, List, Search, Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Grid, List, Search, Filter, Loader } from 'lucide-react';
+// Import your JSON data
+import sareeData from './sarees-data.json';
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('name');
+  const [loading, setLoading] = useState(true);
   
   const ITEMS_PER_PAGE = 8;
 
-  const sareeCategories = [
-    { id: 'all', label: 'All Sarees', count: '100+' },
-    { 
-      id: 'gadwal', 
-      label: 'Gadwal', 
-      priceRange: '₹1,000 - ₹2,700', 
-      description: 'Traditional handwoven sarees from Gadwal',
-      emoji: '🧵'
-    },
-    { 
-      id: 'ilkal', 
-      label: 'Ilkal', 
-      priceRange: '₹1,000 - ₹2,000', 
-      description: 'Authentic Karnataka heritage sarees',
-      emoji: '🎨'
-    },
-    { 
-      id: 'fancy', 
-      label: 'Fancy', 
-      priceRange: '₹1,000 - ₹2,000', 
-      description: 'Contemporary designs for special occasions',
-      emoji: '✨'
-    },
-    { 
-      id: 'soft-silk', 
-      label: 'Soft Silk', 
-      priceRange: '₹1,000 - ₹1,500', 
-      description: 'Luxurious silk sarees with elegant finish',
-      emoji: '🌟'
-    }
-  ];
+  // Load data (simulate API call if needed)
+  useEffect(() => {
+    // Simulate loading time for better UX
+    setTimeout(() => setLoading(false), 500);
+  }, []);
 
-  // Extended sample data - duplicated for demonstration
-  const sareeProducts = {
-    gadwal: [
-      {
-        id: 'g1',
-        name: 'Traditional Gadwal Silk',
-        price: 1300,
-        priceDisplay: '₹1,300',
-        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.49.24_inovlc.jpg',
-        description: 'Handwoven with traditional motifs',
-        blouse: 'with blouse'
-      }
-    ],
-    ilkal: [
-      {
-        id: 'i1',
-        name: 'Classic Ilkal Saree',
-        price: 1500,
-        priceDisplay: '₹1,500',
-        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317695/WhatsApp_Image_2025-07-12_at_15.51.41_awgzk2.jpg',
-        description: 'Traditional Karnataka weave',
-        blouse: 'without blouse'
-      }
-    ],
-    fancy: [
-      {
-        id: 'f1',
-        name: 'Designer Party Saree',
-        price: 1400,
-        priceDisplay: '₹1,400',
-        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317700/WhatsApp_Image_2025-07-12_at_15.49.23_bm3yzc.jpg',
-        description: 'Perfect for special occasions',
-        blouse: 'with blouse'
-      }
-    ],
-    'soft-silk': [
-      {
-        id: 's1',
-        name: 'Pure Soft Silk',
-        price: 1500,
-        priceDisplay: '₹1,500',
-        image: 'https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317698/WhatsApp_Image_2025-07-12_at_15.51.42_f5ig6v.jpg',
-        description: 'Luxurious soft silk texture',
-        blouse: 'with blouse'
-      }
-    ]
-  };
+  // Get all sarees from JSON
+  const allSarees = sareeData.sarees || [];
+  const categories = sareeData.categories || [];
 
   // Get filtered and sorted products
   const getFilteredProducts = () => {
-    let products = [];
+    let products = [...allSarees];
     
-    if (selectedCategory === 'all') {
-      products = Object.values(sareeProducts).flat();
-    } else {
-      products = sareeProducts[selectedCategory] || [];
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      products = products.filter(product => product.category === selectedCategory);
     }
 
     // Apply search filter
     if (searchTerm) {
       products = products.filter(product => 
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -119,6 +52,9 @@ const Products = () => {
         return true;
       });
     }
+
+    // Filter only in-stock items
+    products = products.filter(product => product.inStock);
 
     // Apply sorting
     products.sort((a, b) => {
@@ -137,9 +73,11 @@ const Products = () => {
   const currentProducts = filteredProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Reset page when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, searchTerm, priceRange, sortBy]);
+
+  const formatPrice = (price) => `₹${price.toLocaleString()}`;
 
   const ProductCard = ({ product }) => (
     <div className={`bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
@@ -148,16 +86,33 @@ const Products = () => {
           src={product.image} 
           alt={product.name}
           className={`object-cover ${viewMode === 'list' ? 'w-full h-full' : 'w-full h-80'}`}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/300x400?text=Saree+Image';
+          }}
         />
         <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-          {product.priceDisplay}
+          {formatPrice(product.price)}
         </div>
+        {!product.inStock && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">Out of Stock</span>
+          </div>
+        )}
       </div>
       <div className="p-4 flex-1">
         <h3 className="text-lg font-bold text-red-800 mb-2">{product.name}</h3>
         <p className="text-gray-600 text-sm mb-3">{product.description}</p>
+        {product.tags && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {product.tags.slice(0, 3).map((tag, index) => (
+              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="flex justify-between items-center">
-          <span className="text-xl font-bold text-red-600">{product.priceDisplay}</span>
+          <span className="text-xl font-bold text-red-600">{formatPrice(product.price)}</span>
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
             product.blouse === 'with blouse' 
               ? 'bg-green-100 text-green-800' 
@@ -203,6 +158,17 @@ const Products = () => {
       </button>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Loader className="animate-spin h-12 w-12 text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading our beautiful saree collection...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 py-16">
@@ -259,7 +225,7 @@ const Products = () => {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none"
                 >
-                  {sareeCategories.map(cat => (
+                  {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.label}</option>
                   ))}
                 </select>
@@ -316,6 +282,16 @@ const Products = () => {
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">No products found matching your criteria.</p>
+            <button 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('all');
+                setPriceRange('all');
+              }}
+              className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Clear Filters
+            </button>
           </div>
         )}
 
