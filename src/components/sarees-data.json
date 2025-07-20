@@ -13,7 +13,7 @@
       "description": "Elegant royal blue silk saree with golden zari work",
       "price": 1500,
       "category": "Gadwal",
-      "image": "https://example.com/saree1.jpg",
+      "image": "https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317700/WhatsApp_Image_2025-07-12_at_15.49.23_bm3yzc.jpg",
       "inStock": true,
       "blouse": "with blouse",
       "tags": ["silk", "royal", "wedding", "golden zari"]
