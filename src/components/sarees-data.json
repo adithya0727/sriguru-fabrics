@@ -39,7 +39,7 @@
       "id": "saree-2",
       "name": "saree_name",
       "description": "new saree",
-      "price": 1200,
+      "price": 1300,
       "category": "Gadwal",
       "image": "https://drive.google.com/uc?export=view&id=1tT6V_cTacDMhP7DGpDKC11EkHejW7dta",
       "inStock": true,
