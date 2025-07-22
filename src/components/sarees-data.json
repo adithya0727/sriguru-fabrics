@@ -1,44 +1,52 @@
 {
   "categories": [
-    { "id": "all", "label": "All Categories" },
-    { "id": "Gadwal", "label": "Gadwal Sarees" },
-    { "id": "Ilkal", "label": "Ilkal Sarees" },
-    { "id": "Fancy", "label": "Fancy Sarees" },
-    { "id": "Soft Silk", "label": "Soft Silk Sarees" }
+    {
+      "id": "all",
+      "label": "All Categories"
+    },
+    {
+      "id": "Gadwal",
+      "label": "Gadwal Sarees"
+    },
+    {
+      "id": "Ilkal",
+      "label": "Ilkal Sarees"
+    },
+    {
+      "id": "Fancy",
+      "label": "Fancy Sarees"
+    },
+    {
+      "id": "Soft Silk",
+      "label": "Soft Silk Sarees"
+    }
   ],
   "sarees": [
     {
       "id": "saree-1",
-      "name": "Royal Silk Saree",
-      "description": "Elegant royal blue silk saree with golden zari work",
-      "price": 1500,
-      "category": "Gadwal",
-      "image": "https://res.cloudinary.com/dv1scqfyz/image/upload/v1752317700/WhatsApp_Image_2025-07-12_at_15.49.23_bm3yzc.jpg",
-      "inStock": true,
-      "blouse": "with blouse",
-      "tags": ["silk", "royal", "wedding", "golden zari"]
+      "name": "Untitled Saree",
+      "description": "Beautiful saree",
+      "price": 0,
+      "category": "Fancy",
+      "image": "https://example.com/placeholder.jpg",
+      "inStock": false,
+      "blouse": "without blouse",
+      "tags": [
+        "saree"
+      ]
     },
     {
       "id": "saree-2",
-      "name": "Cotton Handloom Saree",
-      "description": "Traditional cotton handloom saree with block prints",
-      "price": 800,
-      "category": "Ilkal",
-      "image": "https://example.com/saree2.jpg",
-      "inStock": true,
-      "blouse": "without blouse",
-      "tags": ["cotton", "handloom", "traditional", "block print"]
-    },
-    {
-      "id": "saree-3",
-      "name": "Designer Georgette Saree",
-      "description": "Modern georgette saree with embroidery work",
-      "price": 2200,
-      "category": "Fancy",
-      "image": "https://example.com/saree3.jpg",
+      "name": "saree_name",
+      "description": "new saree",
+      "price": 1200,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/uc?export=view&id=1tT6V_cTacDMhP7DGpDKC11EkHejW7dta",
       "inStock": true,
       "blouse": "with blouse",
-      "tags": ["georgette", "designer", "embroidery", "modern"]
+      "tags": [
+        "saree"
+      ]
     }
   ]
 }
