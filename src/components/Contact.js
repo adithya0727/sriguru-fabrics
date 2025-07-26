@@ -182,7 +182,7 @@ const Contact = () => {
             <div className="text-center">
               <div className="text-4xl mb-4">🏆</div>
               <h4 className="font-semibold text-red-700 mb-2">15+ Years Experience</h4>
-              <p className="text-gray-600">Trusted by 1500+ customers across Karnataka</p>
+              <p className="text-gray-600">Trusted by 15000+ customers across Karnataka</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">💝</div>
