@@ -93,11 +93,297 @@
       "description": "Pure Silk Saree",
       "price": 6600,
       "category": "Gadwal",
-      "image": "https://drive.google.com/thumbnail?id=1lAMhvkv_v9CAZFGIO7z-6kBZpmRatI8y&sz=w1000",
+      "image": "https://example.com/placeholder.jpg",
       "inStock": true,
       "blouse": "with blouse",
       "tags": [
         "saree"
+      ]
+    },
+    {
+      "id": "saree-7",
+      "name": "Ilkal Plain saree",
+      "description": "plain saree",
+      "price": 1650,
+      "category": "Ilkal",
+      "image": "https://drive.google.com/thumbnail?id=1x8HtXoMiWZYIBj1hMYh0-w3UymhJPVPP&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-8",
+      "name": "Ilkal Plain Saree",
+      "description": "plain saree",
+      "price": 1650,
+      "category": "Ilkal",
+      "image": "https://drive.google.com/thumbnail?id=18p_YNWrkrnrJnbIeq4WE4LqhIDYziRdh&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-9",
+      "name": "Soft Silk Saree",
+      "description": "Soft Silk",
+      "price": 1450,
+      "category": "Soft Silk",
+      "image": "https://drive.google.com/thumbnail?id=1NL3ef6dDAcF1kEA_nq90HM0Dvy8NDjiS&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-10",
+      "name": "Soft Silk Saree",
+      "description": "Soft Silk",
+      "price": 1450,
+      "category": "Soft Silk",
+      "image": "https://drive.google.com/thumbnail?id=1DilJNy9JQfsT58N8yzOb4Xb-i5Xd0ORL&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-11",
+      "name": "Soft Silk Saree",
+      "description": "Soft Silk",
+      "price": 1450,
+      "category": "Soft Silk",
+      "image": "https://drive.google.com/thumbnail?id=1atNjJ4fnaTLwptmZr2UbfFFq7xhS32TT&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-12",
+      "name": "Soft Silk Saree",
+      "description": "Soft Silk",
+      "price": 1450,
+      "category": "Soft Silk",
+      "image": "https://drive.google.com/thumbnail?id=1-7xsKuOni1fu6obNG0FA8Q21v8-Hdw8C&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-13",
+      "name": "Kasuti Work",
+      "description": "Black Kasuti",
+      "price": 2100,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1ALIYlfNDKpiANm37jfxbdKY4rvRaUzKV&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-14",
+      "name": "Kasuti Work",
+      "description": "Green Kasuti",
+      "price": 1800,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1X4Qp9HplgAId7kK_Ea4IRMQT69o8uaSD&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-15",
+      "name": "Kasuti Work",
+      "description": "Dark Green",
+      "price": 2100,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1_S40h_3zPvgYgr8RArwAvTepDehNbxZH&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-16",
+      "name": "Ilkal Sarees",
+      "description": "Green",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1mYLoMLb6rsg9NGeGE1KNriqS_eZ1rhOZ&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Pallavi"
+      ]
+    },
+    {
+      "id": "saree-17",
+      "name": "Ilkal Sarees",
+      "description": "Black",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1X91JRHp6-6zrNcaUJDeYxEkzZGBRq053&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Pallavi"
+      ]
+    },
+    {
+      "id": "saree-18",
+      "name": "Ilkal Sarees",
+      "description": "Small Chex Green",
+      "price": 1900,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=17BesQu9xvWVJ70fsDxFRTBcbj9beKti2&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Small chex"
+      ]
+    },
+    {
+      "id": "saree-19",
+      "name": "Ilkal Sarees",
+      "description": "Radhika",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1OLFleOzhmKUXm7xSn_ig8VNPvoBxpa6S&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Radhika"
+      ]
+    },
+    {
+      "id": "saree-20",
+      "name": "Ilkal Sarees",
+      "description": "Pallavi",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1D6PHqkjhqFxY38Fkr35HTl2z7W9hkVkW&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Pallavi"
+      ]
+    },
+    {
+      "id": "saree-21",
+      "name": "Ilkal sarees",
+      "description": "Radhika",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=13lHHJxM3jN7_eRCR9QQdzor5WUSingjf&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Radhika"
+      ]
+    },
+    {
+      "id": "saree-22",
+      "name": "Ilkal sarees",
+      "description": "Golden Chex",
+      "price": 2000,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1zY5RAGIVMVmVwAHXLMvrQMlUjD6fdImL&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Golden chex Red"
+      ]
+    },
+    {
+      "id": "saree-23",
+      "name": "Ilkal sarees",
+      "description": "Golden chex",
+      "price": 2000,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1TYVPxiNXJ5P2x0nvBFohMkdg3Ac93n_q&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Golden chex green"
+      ]
+    },
+    {
+      "id": "saree-24",
+      "name": "Ilkal sarees",
+      "description": "chex",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1dNMoPwk2daDvR11CQJpFmS37DsGQJNHB&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "green chex"
+      ]
+    },
+    {
+      "id": "saree-25",
+      "name": "Ilkal sarees",
+      "description": "Tum Tum Chex Red & Yellow",
+      "price": 2000,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=17asV3DYU49oH39QXslAfK5tErL4qhRv5&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Red & yellow chex"
+      ]
+    },
+    {
+      "id": "saree-26",
+      "name": "Ilkal Sarees",
+      "description": "Tum Tum Chex Pink & White",
+      "price": 2000,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1GVRFV0IxksoQMsw82eqRR0YvEYWM2ri6&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Pink & White"
+      ]
+    },
+    {
+      "id": "saree-27",
+      "name": "Ilkal sarees",
+      "description": "Pallavi",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1fbgMUDQQjL1JGz3J9iGTQLZQidcekw28&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "pallavi"
+      ]
+    },
+    {
+      "id": "saree-28",
+      "name": "Ilkal sarees",
+      "description": "pallavi",
+      "price": 1500,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1weoue2FRaxU2NU1JmOgQT8md4cSVob1s&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "pallavi"
       ]
     }
   ]
