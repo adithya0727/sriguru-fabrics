@@ -37,11 +37,11 @@
     },
     {
       "id": "saree-2",
-      "name": "saree_name",
-      "description": "new saree",
-      "price": 1300,
+      "name": "semi silk",
+      "description": "semi silk saree with golden butta",
+      "price": 2700,
       "category": "Gadwal",
-      "image": "https://drive.google.com/thumbnail?id=1tT6V_cTacDMhP7DGpDKC11EkHejW7dta&sz=w1000",
+      "image": "https://drive.google.com/thumbnail?id=1OBLu_NBKycyHg4sI7HSpJUxL-ksLtnyW&sz=w1000",
       "inStock": true,
       "blouse": "with blouse",
       "tags": [
