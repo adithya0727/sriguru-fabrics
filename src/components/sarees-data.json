@@ -37,11 +37,63 @@
     },
     {
       "id": "saree-2",
-      "name": "semi silk",
+      "name": "Semi silk",
       "description": "semi silk saree with golden butta",
       "price": 2700,
       "category": "Gadwal",
       "image": "https://drive.google.com/thumbnail?id=1OBLu_NBKycyHg4sI7HSpJUxL-ksLtnyW&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-3",
+      "name": "Pure Silk",
+      "description": "Pure silk saree",
+      "price": 6600,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1C7O8iYTf-PMskjyc3qARZ6VGkPRx_-ge&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-4",
+      "name": "Semi Silk",
+      "description": "Semi Silk with Golden Butta",
+      "price": 2700,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1RwTxfo91W9xf8SdUiWjPvFtE3DKV3RYL&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-5",
+      "name": "semi silk",
+      "description": "Semi Silk with Bentex Border",
+      "price": 2300,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1MInT-_EOJ0W_wQGL6cdDALl5tcivI20_&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "saree"
+      ]
+    },
+    {
+      "id": "saree-6",
+      "name": "Pure Silk",
+      "description": "Pure Silk Saree",
+      "price": 6600,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1lAMhvkv_v9CAZFGIO7z-6kBZpmRatI8y&sz=w1000",
       "inStock": true,
       "blouse": "with blouse",
       "tags": [
