@@ -23,7 +23,7 @@ const Footer = () => {
     { type: 'address', icon: '📍', text: 'Chikkalasandra, Bangalore - 560061' },
     { type: 'phone', icon: '📞', text: '+91 9663733683' },
     { type: 'phone', icon: '📞', text: '+91 9448129415' },
-    { type: 'phone', icon: '📞', text: '+91 9980016054' },
+    { type: 'phone', icon: '📞', text: '+91 9980898627' },
     { type: 'hours', icon: '🕒', text: 'Mon-Sat: 10AM-8PM, Sun: 10AM-6PM' }
   ];
 
