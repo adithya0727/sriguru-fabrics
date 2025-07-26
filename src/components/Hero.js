@@ -55,7 +55,7 @@ const Hero = ({ scrollToSection }) => {
           </div>
           <div className="text-center bg-white p-8 rounded-xl shadow-lg slide-up">
             <div className="text-4xl mb-4">👥</div>
-            <div className="text-3xl font-bold text-red-800">500+</div>
+            <div className="text-3xl font-bold text-red-800">1500+</div>
             <div className="text-red-600 font-semibold">Happy Customers</div>
           </div>
           <div className="text-center bg-white p-8 rounded-xl shadow-lg slide-up">
@@ -72,7 +72,7 @@ const Hero = ({ scrollToSection }) => {
             <div className="text-center">
               <div className="text-4xl mb-4">✅</div>
               <h3 className="font-semibold text-red-800 mb-2">Authenticity</h3>
-              <p className="text-gray-600 text-sm">Sourcing from diverse regions, celebrating real craftsmanship</p>
+              <p className="text-gray-600 text-sm">Sourcing from diverse manufacturers, celebrating real craftsmanship</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">💰</div>
