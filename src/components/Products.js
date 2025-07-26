@@ -14,6 +14,7 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   
   const ITEMS_PER_PAGE = 8;
+  const DISCOUNT_PERCENTAGE = 10;
 
   // Load data (simulate API call if needed)
   useEffect(() => {
@@ -24,6 +25,11 @@ const Products = () => {
   // Get all sarees from JSON
   const allSarees = sareeData.sarees || [];
   const categories = sareeData.categories || [];
+
+  // Calculate discounted price
+  const calculateDiscountedPrice = (originalPrice) => {
+    return Math.round(originalPrice * (1 - DISCOUNT_PERCENTAGE / 100));
+  };
 
   // Get filtered and sorted products
   const getFilteredProducts = () => {
@@ -43,12 +49,13 @@ const Products = () => {
       );
     }
 
-    // Apply price filter
+    // Apply price filter (using discounted prices)
     if (priceRange !== 'all') {
       products = products.filter(product => {
-        if (priceRange === 'low') return product.price <= 1300;
-        if (priceRange === 'medium') return product.price > 1300 && product.price <= 1800;
-        if (priceRange === 'high') return product.price > 1800;
+        const discountedPrice = calculateDiscountedPrice(product.price);
+        if (priceRange === 'low') return discountedPrice <= 1170; // 1300 * 0.9
+        if (priceRange === 'medium') return discountedPrice > 1170 && discountedPrice <= 1620; // 1800 * 0.9
+        if (priceRange === 'high') return discountedPrice > 1620;
         return true;
       });
     }
@@ -56,10 +63,10 @@ const Products = () => {
     // Filter only in-stock items
     products = products.filter(product => product.inStock);
 
-    // Apply sorting
+    // Apply sorting (using discounted prices)
     products.sort((a, b) => {
-      if (sortBy === 'price-low') return a.price - b.price;
-      if (sortBy === 'price-high') return b.price - a.price;
+      if (sortBy === 'price-low') return calculateDiscountedPrice(a.price) - calculateDiscountedPrice(b.price);
+      if (sortBy === 'price-high') return calculateDiscountedPrice(b.price) - calculateDiscountedPrice(a.price);
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       return 0;
     });
@@ -79,6 +86,24 @@ const Products = () => {
 
   const formatPrice = (price) => `₹${price.toLocaleString()}`;
 
+  const PriceDisplay = ({ originalPrice, className = "" }) => {
+    const discountedPrice = calculateDiscountedPrice(originalPrice);
+    
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="flex flex-col">
+          <span className="text-xl font-bold text-red-600">{formatPrice(discountedPrice)}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 line-through">{formatPrice(originalPrice)}</span>
+            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+              {DISCOUNT_PERCENTAGE}% OFF
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const ProductCard = ({ product }) => (
     <div className={`bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
       <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
@@ -91,7 +116,10 @@ const Products = () => {
           }}
         />
         <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-          {formatPrice(product.price)}
+          {formatPrice(calculateDiscountedPrice(product.price))}
+        </div>
+        <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+          {DISCOUNT_PERCENTAGE}% OFF
         </div>
         {!product.inStock && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -112,7 +140,7 @@ const Products = () => {
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="text-xl font-bold text-red-600">{formatPrice(product.price)}</span>
+          <PriceDisplay originalPrice={product.price} />
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
             product.blouse === 'with blouse' 
               ? 'bg-green-100 text-green-800' 
@@ -239,9 +267,9 @@ const Products = () => {
                   className="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:outline-none"
                 >
                   <option value="all">All Prices</option>
-                  <option value="low">Under ₹1,300</option>
-                  <option value="medium">₹1,300 - ₹1,800</option>
-                  <option value="high">Above ₹1,800</option>
+                  <option value="low">Under ₹1,170</option>
+                  <option value="medium">₹1,170 - ₹1,620</option>
+                  <option value="high">Above ₹1,620</option>
                 </select>
               </div>
               
