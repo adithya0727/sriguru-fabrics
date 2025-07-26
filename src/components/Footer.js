@@ -101,7 +101,7 @@ const Footer = () => {
             </ul>
             <div className="mt-4 p-3 bg-red-800 rounded-lg">
               <p className="text-red-200 text-xs">
-                <strong>💰 Price Range:</strong> ₹1,000 - ₹2,700
+                <strong>💰 Price Range:</strong> ₹600 - ₹7000
               </p>
             </div>
           </div>
@@ -139,7 +139,7 @@ const Footer = () => {
               <div className="text-red-300 text-sm">Years Experience</div>
             </div>
             <div className="bg-red-800 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-red-200">500+</div>
+              <div className="text-2xl font-bold text-red-200">1500+</div>
               <div className="text-red-300 text-sm">Happy Customers</div>
             </div>
             <div className="bg-red-800 p-4 rounded-lg">
