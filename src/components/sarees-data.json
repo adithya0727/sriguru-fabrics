@@ -398,6 +398,214 @@
       "tags": [
         "Soft silk"
       ]
+    },
+    {
+      "id": "saree-30",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1f854EYNiGWCcgN0PusUXfOy9Rj4WteYO&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border grey colour"
+      ]
+    },
+    {
+      "id": "saree-31",
+      "name": "Gadhwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1tmo2t5uEc7LqXTlwV4pr8jl4d6XAzy6X&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border blue and yellow"
+      ]
+    },
+    {
+      "id": "saree-32",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=16GiQABi7P5IrKKTcpEpzzcmfIAt_wfkr&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border"
+      ]
+    },
+    {
+      "id": "saree-33",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1dWYvXRnwF9VWjqTgZ7ZSIhpvl6SyYa8N&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border  grey"
+      ]
+    },
+    {
+      "id": "saree-34",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1MJXjCiKpIqXZuVof042-EmcOPyy_OE2o&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border"
+      ]
+    },
+    {
+      "id": "saree-35",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1s_0v-7iGcLCmCQ6RNyUNq0Eq6wO-8ixN&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border lavender"
+      ]
+    },
+    {
+      "id": "saree-36",
+      "name": "Gadwal sarees",
+      "description": "Bentex Border",
+      "price": 1275,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1WToBnrDTz50CXGSat4TusIeys90dipeE&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Bentex Border"
+      ]
+    },
+    {
+      "id": "saree-37",
+      "name": "Gadwal sarees",
+      "description": "Golden temple border grey color",
+      "price": 1350,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=16gDg-CGfJzW8VF6Di9W8cP7LsFnSN4Hm&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "golden temple border grey color"
+      ]
+    },
+    {
+      "id": "saree-38",
+      "name": "Gadwal sarees",
+      "description": "Black chex border",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1J0LaxEqf6on7plbVu_QuYGK8n8xYyKDk&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Black chex border"
+      ]
+    },
+    {
+      "id": "saree-39",
+      "name": "Gadwal sarees",
+      "description": "Black chex broder",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1RKlz7l8cX63zRUVClRQ2q6OiFqXWX77P&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Black chex border"
+      ]
+    },
+    {
+      "id": "saree-40",
+      "name": "Gadwal sarees",
+      "description": "Black chex border",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1U_xgFarfEHxepVKcYMsSv9RhyvnnuGrB&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Black chex border"
+      ]
+    },
+    {
+      "id": "saree-41",
+      "name": "Gadwal sarees",
+      "description": "Black chex border",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1hgs-lrS_ixtw10U3Aubq99W_-1YXFF8I&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Black chex border"
+      ]
+    },
+    {
+      "id": "saree-42",
+      "name": "Gadwal sarees",
+      "description": "black chex border",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1HG5iCn0FkniNxpRwe6c-Sf5L5xGwWl-V&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "black chex border"
+      ]
+    },
+    {
+      "id": "saree-43",
+      "name": "Gadwal sarees",
+      "description": "Temple border red and black",
+      "price": 1125,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1M5e8deBFJRdt8hVgnIV-DX-zP4AYgSNQ&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "temple border red and black"
+      ]
+    },
+    {
+      "id": "saree-44",
+      "name": "Gadwal sarees",
+      "description": "Worli print",
+      "price": 1300,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1M25R_zR6FkUX2AQtpNIWAmo-z4PUpCRB&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Worli print"
+      ]
+    },
+    {
+      "id": "saree-45",
+      "name": "Gadwal sarees",
+      "description": "Worli print",
+      "price": 1300,
+      "category": "Gadwal",
+      "image": "https://drive.google.com/thumbnail?id=1mi9LJY5dLdD7lx7i8NmKA8tweUkjHr2o&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Worli print"
+      ]
     }
   ]
 }
