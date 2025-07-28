@@ -762,6 +762,149 @@
       "tags": [
         "Worli print"
       ]
+    },
+    {
+      "id": "saree-58",
+      "name": "Fancy cotton saree",
+      "description": "Pink and green fancy cotton saree",
+      "price": 1060,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1n6vmqncoIEcKRIddK2aeetaYx7Ex5Sms&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy cotton saree"
+      ]
+    },
+    {
+      "id": "saree-59",
+      "name": "Fancy cotton saree",
+      "description": "Green and red fancy cotton saree",
+      "price": 1060,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=18ftn0OBAngdR_jOw5oIpffK3Yl6G4r-H&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy cotton saree"
+      ]
+    },
+    {
+      "id": "saree-60",
+      "name": "Fancy cotton saree",
+      "description": "Blue and red fancy cotton saree",
+      "price": 1060,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1eZq-yMZmHJqpt-lONIY_WrQvYJfE8PKI&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy cotton saree"
+      ]
+    },
+    {
+      "id": "saree-61",
+      "name": "Fancy saree",
+      "description": "Light peach colour",
+      "price": 950,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1U--8QMtE5_ihCTEenLiMdKqcxKW3jow8&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy  saree"
+      ]
+    },
+    {
+      "id": "saree-62",
+      "name": "Fancy saree",
+      "description": "Light blue color",
+      "price": 950,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1JXb53acnMhvnkOzDfQ8OhCQyaLDxbouA&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
+    },
+    {
+      "id": "saree-63",
+      "name": "Fancy saree",
+      "description": "Light blue printed saree",
+      "price": 970,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1TT_EyjCADyhujJDMpuP6fhO3zZExDjcY&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
+    },
+    {
+      "id": "saree-64",
+      "name": "Fancy saree",
+      "description": "Beautiful saree",
+      "price": 1170,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=19kh3MgJ8_QYzAXfSQa-Z3cDViTPaCeOc&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
+    },
+    {
+      "id": "saree-65",
+      "name": "Fancy saree",
+      "description": "Beautiful saree",
+      "price": 700,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1pIExl10h0FRL5WGc_R8oUhbEmT00f1JJ&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
+    },
+    {
+      "id": "saree-66",
+      "name": "Fancy saree",
+      "description": "maroon",
+      "price": 785,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1gZuc2BdcgmA2kVvqVZgAwBeMdSD7U2TA&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
+    },
+    {
+      "id": "saree-67",
+      "name": "pure cotton saree",
+      "description": "pure cotton saree",
+      "price": 1620,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1HRJQpREfJ72Gr9IRk07lbfkCwE_TTCMh&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "cotton saree"
+      ]
+    },
+    {
+      "id": "saree-68",
+      "name": "Fancy saree",
+      "description": "fancy saree",
+      "price": 1265,
+      "category": "Fancy",
+      "image": "https://drive.google.com/thumbnail?id=1gwKa-PSf815o1l4dFlcUhXCNTm7WvBkf&sz=w1000",
+      "inStock": true,
+      "blouse": "with blouse",
+      "tags": [
+        "Fancy saree"
+      ]
     }
   ]
 }
