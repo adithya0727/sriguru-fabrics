@@ -16,7 +16,7 @@ export default async function CatalogPage({ searchParams }: Props) {
     <main className="max-w-3xl mx-auto px-4 py-6">
       <header className="text-center mb-6">
         <h1 className="text-2xl font-semibold text-brand-800">
-          Sri Guru Raghavendra Fabrics
+          Sri Guru Raya Fabrics
         </h1>
         <p className="text-sm text-stone-500 mt-1">
           Gadwal, Ilkal and soft silk sarees · Chikkalasandra, Bangalore

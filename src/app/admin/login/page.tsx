@@ -76,7 +76,7 @@ function LoginForm() {
         className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-brand-100 p-6"
       >
         <h1 className="text-xl font-semibold text-brand-800">
-          Sri Guru Raghavendra Fabrics
+          Sri Guru Raya Fabrics
         </h1>
         <p className="text-sm text-stone-500 mt-1 mb-6">Stock register</p>
 

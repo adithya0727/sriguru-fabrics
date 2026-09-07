@@ -151,7 +151,7 @@ export default async function SareePage({ params }: Props) {
         )}
 
         <p className="text-xs text-stone-400 text-center mt-6">
-          Sri Guru Raghavendra Fabrics · Chikkalasandra, Bangalore
+          Sri Guru Raya Fabrics · Chikkalasandra, Bangalore
         </p>
       </div>
     </main>
