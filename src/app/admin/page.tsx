@@ -1,5 +1,6 @@
 import { getSessionClient } from '@/lib/supabase/server';
 import StockList from '@/components/StockList';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export default async function StockPage() {
 
       <StockList
         sarees={sarees.map((s) => ({ ...s, price: Number(s.price), cost_price: s.cost_price != null ? Number(s.cost_price) : null }))}
-        siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? ''}
+        siteUrl={getSiteUrl()}
       />
     </div>
   );

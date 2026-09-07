@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicSaree, getSimilarSarees } from '@/lib/queries';
+import { getSiteUrl } from '@/lib/site-url';
 
 // Rendered fresh on every request. This is what makes an old WhatsApp link
 // tell the truth: a saree sold three weeks after the message was sent shows as
@@ -47,7 +48,7 @@ export default async function SareePage({ params }: Props) {
 
   const enquiry = encodeURIComponent(
     `Hello, I'm interested in this saree:\n${saree.name}\n₹${price}\n` +
-      `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/s/${saree.id}`,
+      `${getSiteUrl()}/s/${saree.id}`,
   );
 
   return (
