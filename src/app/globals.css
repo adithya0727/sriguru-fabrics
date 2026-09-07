@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-brand-50: #fdf4f3;
+  --color-brand-100: #fce8e6;
+  --color-brand-200: #f9d5d1;
+  --color-brand-400: #e07a6f;
+  --color-brand-600: #b03a2e;
+  --color-brand-700: #8e2f25;
+  --color-brand-800: #6d241d;
+  --color-brand-900: #4a1813;
+  --color-gold-500: #b8860b;
+  --color-gold-100: #faf3e0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #fbfaf8;
+  color: #1c1917;
+}
+
+/* Admin is used one-handed on a phone, often while holding a saree.
+   Targets below this are missed constantly. */
+.tap-target {
+  min-height: 48px;
+}
+
+/* Stops iOS Safari zooming the whole page when a field is focused. */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
