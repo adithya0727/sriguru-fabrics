@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Camera, Images, Loader2, Check, Share2, AlertCircle } from 'lucide-react';
+import { Camera, Images, Check, Share2, AlertCircle, Sparkles } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
 import { prepareSareePhoto } from '@/lib/photos';
 import type { TaggedAttributes } from '@/lib/types';
@@ -39,6 +39,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [autoFilled, setAutoFilled] = useState(false);
 
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -55,9 +56,9 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
     try {
       const prepared = await Promise.all(chosen.map(prepareSareePhoto));
 
-      // Upload and tag at the same time. Done in sequence this is two waits;
-      // in parallel it's one, and the whole point is that adding a saree has
-      // to feel faster than not bothering.
+      // Upload and tag at the same time. In sequence this is two waits; in
+      // parallel it's one, and the whole point is that adding a saree has to
+      // feel faster than not bothering.
       const [urls, tagged] = await Promise.all([
         uploadAll(prepared.map((p) => p.display)),
         requestTags(
@@ -74,8 +75,9 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
 
       if (tagged) {
         setDraft({ ...EMPTY_DRAFT, ...tagged });
-        setNote(null);
+        setAutoFilled(true);
       } else {
+        setAutoFilled(false);
         setNote(
           'Could not read the photos automatically — please fill in the details.',
         );
@@ -115,7 +117,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
       const json = await res.json();
       return json.attributes as TaggedAttributes;
     } catch {
-      // Tagging is a convenience, never a blocker — the person can always type.
+      // Tagging is a convenience, never a blocker — a person can always type.
       return null;
     }
   }
@@ -171,6 +173,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
     setSavedId(null);
     setNote(null);
     setError(null);
+    setAutoFilled(false);
   }
 
   // ---------------------------------------------------------------- rendering
@@ -179,17 +182,17 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
     const url = `${window.location.origin}/s/${savedId}`;
     const message = `${draft.name}\n₹${Number(draft.price).toLocaleString('en-IN')}\n${url}`;
     return (
-      <div className="px-5 py-8 text-center">
-        <div className="mx-auto w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
-          <Check className="text-green-700" size={28} />
+      <div className="max-w-lg mx-auto px-5 py-12 text-center rise">
+        <div className="mx-auto w-14 h-14 rounded-full bg-good-bg flex items-center justify-center mb-5">
+          <Check className="text-good" size={26} strokeWidth={2.5} />
         </div>
-        <h2 className="text-lg font-semibold text-stone-900">Saved</h2>
-        <p className="text-sm text-stone-500 mt-1 mb-6">
-          This link stays correct on its own — if the saree sells, anyone who
-          opens it later sees that, and other sarees to look at.
+        <h1 className="font-display text-2xl text-maroon-900">Saved</h1>
+        <p className="text-ink-soft mt-2 mb-7 leading-relaxed">
+          This link looks after itself — if the saree sells, anyone who opens it
+          later sees that, along with other sarees to look at.
         </p>
 
-        <div className="bg-white border border-stone-200 rounded-xl p-3 text-sm text-stone-600 break-all mb-4">
+        <div className="card px-4 py-3 text-sm text-ink-soft break-all mb-4">
           {url}
         </div>
 
@@ -197,16 +200,13 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
           href={`https://wa.me/?text=${encodeURIComponent(message)}`}
           target="_blank"
           rel="noreferrer"
-          className="tap-target flex items-center justify-center gap-2 w-full rounded-lg bg-green-600 text-white font-medium mb-3"
+          className="btn btn-whatsapp w-full mb-3"
         >
-          <Share2 size={18} />
+          <Share2 size={17} />
           Send on WhatsApp
         </a>
 
-        <button
-          onClick={reset}
-          className="tap-target w-full rounded-lg border border-brand-700 text-brand-700 font-medium"
-        >
+        <button onClick={reset} className="btn btn-secondary w-full">
           Add another saree
         </button>
       </div>
@@ -215,35 +215,53 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
 
   if (stage === 'photos') {
     return (
-      <div className="px-5 py-8">
-        <h1 className="text-xl font-semibold text-stone-900 mb-1">Add a saree</h1>
-        <p className="text-sm text-stone-500 mb-6">
-          Take two or three photos: the full saree, the border, and the pallu.
-          The details fill in by themselves.
+      <div className="max-w-lg mx-auto px-5 py-10 rise">
+        <p className="eyebrow mb-2">New arrival</p>
+        <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight">
+          Add a saree
+        </h1>
+        <p className="text-ink-soft mt-2.5 leading-relaxed">
+          Three photos is ideal — the full saree, the border, and the pallu.
+          Everything else fills in by itself.
         </p>
 
         {error && (
-          <p className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+          <p
+            role="alert"
+            className="flex items-start gap-2 text-sm text-bad bg-bad-bg border border-bad/20 rounded-lg px-3 py-2.5 mt-5"
+          >
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
             {error}
           </p>
         )}
 
-        <button
-          onClick={() => cameraRef.current?.click()}
-          className="tap-target w-full flex items-center justify-center gap-2 rounded-xl bg-brand-700 text-white font-medium mb-3 py-4"
-        >
-          <Camera size={20} />
-          Take photos
-        </button>
+        <div className="mt-8 space-y-3">
+          <button
+            onClick={() => cameraRef.current?.click()}
+            className="btn btn-primary w-full h-auto py-5 flex-col gap-2"
+          >
+            <Camera size={26} strokeWidth={1.6} />
+            <span className="text-base">Take photos</span>
+          </button>
 
-        <button
-          onClick={() => galleryRef.current?.click()}
-          className="tap-target w-full flex items-center justify-center gap-2 rounded-xl border border-stone-300 text-stone-700 font-medium py-4"
-        >
-          <Images size={20} />
-          Choose from gallery
-        </button>
+          <button
+            onClick={() => galleryRef.current?.click()}
+            className="btn btn-secondary w-full"
+          >
+            <Images size={18} />
+            Choose from gallery
+          </button>
+        </div>
+
+        <div className="rule-fade my-8" />
+
+        <div className="flex items-start gap-3 text-sm text-ink-soft">
+          <Sparkles size={17} className="text-gold-500 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            The name, description, fabric, border and colours are written for
+            you. You only type the two prices.
+          </p>
+        </div>
 
         <input
           ref={cameraRef}
@@ -268,23 +286,26 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
 
   if (stage === 'working') {
     return (
-      <div className="px-5 py-16 text-center">
-        <Loader2 className="animate-spin mx-auto text-brand-600 mb-4" size={32} />
-        <p className="text-stone-700 font-medium">Reading the photos…</p>
-        <p className="text-sm text-stone-500 mt-1">This takes a few seconds.</p>
+      <div className="max-w-lg mx-auto px-5 py-20 text-center">
         {previews.length > 0 && (
-          <div className="flex gap-2 justify-center mt-6">
-            {previews.map((src) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+          <div className="flex gap-2.5 justify-center mb-8">
+            {previews.map((src, i) => (
+              <div
                 key={src}
-                src={src}
-                alt=""
-                className="w-16 h-20 object-cover rounded-lg opacity-60"
-              />
+                className="frame w-20 h-[6.5rem] rise"
+                style={{ animationDelay: `${i * 90}ms` }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </div>
             ))}
           </div>
         )}
+        <div className="inline-flex items-center gap-2.5 text-maroon-700">
+          <Sparkles size={18} className="animate-pulse" />
+          <p className="font-display text-lg">Reading the photos</p>
+        </div>
+        <p className="text-sm text-ink-soft mt-2">This takes a few seconds.</p>
       </div>
     );
   }
@@ -293,53 +314,71 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
   const uncertain = new Set(draft.low_confidence);
 
   return (
-    <div className="px-5 py-6">
-      <h1 className="text-xl font-semibold text-stone-900 mb-1">Check and save</h1>
-      <p className="text-sm text-stone-500 mb-5">
+    <div className="max-w-lg mx-auto px-5 py-8">
+      <p className="eyebrow mb-2">Almost done</p>
+      <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight">
+        Check and save
+      </h1>
+      <p className="text-ink-soft mt-2">
         Only the prices need typing. Change anything that looks wrong.
       </p>
 
+      {autoFilled && (
+        <p className="flex items-center gap-2 text-sm text-maroon-700 bg-maroon-50 border border-maroon-100 rounded-lg px-3 py-2.5 mt-4">
+          <Sparkles size={15} className="shrink-0" />
+          Details filled in from the photos
+        </p>
+      )}
       {note && (
-        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+        <p className="text-sm text-warn bg-warn-bg border border-gold-300/40 rounded-lg px-3 py-2.5 mt-4">
           {note}
         </p>
       )}
 
       {previews.length > 0 && (
-        <div className="flex gap-2 mb-5">
+        <div className="flex gap-2.5 mt-6">
           {previews.map((src) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={src}
-              src={src}
-              alt=""
-              className="w-20 h-24 object-cover rounded-lg border border-stone-200"
-            />
+            <div key={src} className="frame w-20 h-[6.5rem]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </div>
           ))}
         </div>
       )}
 
       {/* Money first — it's the only part a person actually has to think about. */}
-      <div className="bg-white border border-stone-200 rounded-xl p-4 mb-5">
-        <Field label="Selling price (₹)" required>
-          <input
-            type="number"
-            inputMode="numeric"
-            autoFocus
-            value={draft.price}
-            onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 text-lg font-medium focus:border-brand-600 outline-none"
-          />
+      <section className="card p-5 mt-6">
+        <h2 className="eyebrow mb-4">Prices</h2>
+
+        <Field label="Selling price" required>
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
+              ₹
+            </span>
+            <input
+              type="number"
+              inputMode="numeric"
+              autoFocus
+              value={draft.price}
+              onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+              className="field pl-8 text-lg font-medium"
+            />
+          </div>
         </Field>
 
-        <Field label="What we paid (₹)" hint="Only we see this. Used for profit.">
-          <input
-            type="number"
-            inputMode="numeric"
-            value={draft.cost_price}
-            onChange={(e) => setDraft({ ...draft, cost_price: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 focus:border-brand-600 outline-none"
-          />
+        <Field label="What we paid" hint="Only we see this. Used for profit.">
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
+              ₹
+            </span>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={draft.cost_price}
+              onChange={(e) => setDraft({ ...draft, cost_price: e.target.value })}
+              className="field pl-8"
+            />
+          </div>
         </Field>
 
         <Field label="How many pieces of this design?">
@@ -348,20 +387,20 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
             inputMode="numeric"
             min={1}
             value={draft.quantity_total}
-            onChange={(e) =>
-              setDraft({ ...draft, quantity_total: e.target.value })
-            }
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 focus:border-brand-600 outline-none"
+            onChange={(e) => setDraft({ ...draft, quantity_total: e.target.value })}
+            className="field"
           />
         </Field>
-      </div>
+      </section>
 
-      <div className="bg-white border border-stone-200 rounded-xl p-4 mb-5">
+      <section className="card p-5 mt-4">
+        <h2 className="eyebrow mb-4">Details</h2>
+
         <Field label="Name">
           <input
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 focus:border-brand-600 outline-none"
+            className="field"
           />
         </Field>
 
@@ -370,7 +409,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
             rows={3}
             value={draft.description}
             onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:border-brand-600 outline-none"
+            className="field"
           />
         </Field>
 
@@ -378,7 +417,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
           <select
             value={draft.category}
             onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 bg-white focus:border-brand-600 outline-none"
+            className="field"
           >
             {categories.map((c) => (
               <option key={c} value={c}>
@@ -391,45 +430,45 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
         <Field
           label="Fabric"
           flagged={uncertain.has('fabric')}
-          hint={uncertain.has('fabric') ? 'Please check this one' : undefined}
+          hint={
+            uncertain.has('fabric')
+              ? 'Hard to tell from a photo — please check'
+              : undefined
+          }
         >
           <input
             value={draft.fabric}
             onChange={(e) => setDraft({ ...draft, fabric: e.target.value })}
-            className={`tap-target w-full px-3 rounded-lg border outline-none ${
-              uncertain.has('fabric')
-                ? 'border-amber-400 bg-amber-50'
-                : 'border-stone-300'
-            }`}
+            className={`field ${uncertain.has('fabric') ? 'field-flagged' : ''}`}
           />
         </Field>
 
-        <label className="flex items-center gap-3 py-2">
+        <label className="flex items-center gap-3 py-1 cursor-pointer">
           <input
             type="checkbox"
             checked={draft.has_blouse}
             onChange={(e) => setDraft({ ...draft, has_blouse: e.target.checked })}
-            className="w-5 h-5 accent-brand-700"
+            className="w-5 h-5 accent-maroon-700"
           />
-          <span className="text-sm text-stone-700">
+          <span className="text-sm text-ink">
             Blouse piece included
             {uncertain.has('has_blouse') && (
-              <span className="text-amber-700"> — please check</span>
+              <span className="text-warn"> — please check</span>
             )}
           </span>
         </label>
-      </div>
+      </section>
 
       {error && (
-        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+        <p
+          role="alert"
+          className="text-sm text-bad bg-bad-bg border border-bad/20 rounded-lg px-3 py-2.5 mt-4"
+        >
           {error}
         </p>
       )}
 
-      <button
-        onClick={handleSave}
-        className="tap-target w-full rounded-xl bg-brand-700 text-white font-medium py-4"
-      >
+      <button onClick={handleSave} className="btn btn-primary w-full mt-6">
         Save saree
       </button>
     </div>
@@ -451,13 +490,13 @@ function Field({
 }) {
   return (
     <div className="mb-4 last:mb-0">
-      <label className="block text-sm font-medium text-stone-700 mb-1.5">
+      <label className="block text-sm font-medium text-ink mb-1.5">
         {label}
-        {required && <span className="text-brand-600"> *</span>}
-        {flagged && <span className="text-amber-600"> ⚠</span>}
+        {required && <span className="text-maroon-600"> *</span>}
+        {flagged && <span className="text-gold-700"> ⚠</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-stone-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-ink-soft mt-1.5">{hint}</p>}
     </div>
   );
 }

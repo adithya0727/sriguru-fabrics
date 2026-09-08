@@ -13,53 +13,110 @@ export default async function CatalogPage({ searchParams }: Props) {
   ]);
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-6">
-      <header className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-brand-800">
-          Sri Guru Raya Fabrics
+    <div className="min-h-screen">
+      <header className="px-5 pt-14 pb-10 text-center rise">
+        <p className="eyebrow mb-4">Chikkalasandra · Bangalore</p>
+        <h1 className="font-display text-[2.125rem] leading-[1.1] sm:text-5xl text-maroon-900">
+          Sri Guru Raghavendra
+          <span className="block text-maroon-700">Fabrics</span>
         </h1>
-        <p className="text-sm text-stone-500 mt-1">
-          Gadwal, Ilkal and soft silk sarees · Chikkalasandra, Bangalore
+        <div className="rule-fade max-w-[180px] mx-auto my-6" />
+        <p className="text-ink-soft max-w-md mx-auto leading-relaxed">
+          Gadwal, Ilkal and soft silks, chosen one at a time. Fifteen years of
+          buying carefully for families in South Bangalore.
         </p>
       </header>
 
-      <nav className="flex gap-2 overflow-x-auto pb-4 -mx-4 px-4">
-        <CategoryChip label="All" href="/" active={!category} />
-        {categories.map((c) => (
-          <CategoryChip
-            key={c}
-            label={c}
-            href={`/?category=${encodeURIComponent(c)}`}
-            active={category === c}
-          />
-        ))}
-      </nav>
-
-      {sarees.length === 0 ? (
-        <p className="text-center text-stone-500 py-16">
-          Nothing in this section right now.
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {sarees.map((s) => (
-            <Link key={s.id} href={`/s/${s.id}`} className="block">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={s.photos[0] ?? ''}
-                alt={s.name}
-                className="w-full aspect-[3/4] object-cover rounded-xl bg-stone-100"
-              />
-              <p className="text-sm font-medium text-stone-900 mt-1.5 truncate">
-                {s.name}
-              </p>
-              <p className="text-sm text-stone-600">
-                ₹{Number(s.price).toLocaleString('en-IN')}
-              </p>
-            </Link>
+      <nav
+        aria-label="Saree types"
+        className="sticky top-0 z-20 bg-canvas/85 backdrop-blur-md border-y border-line"
+      >
+        <div className="max-w-5xl mx-auto flex gap-2 overflow-x-auto px-5 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <CategoryChip label="Everything" href="/" active={!category} />
+          {categories.map((c) => (
+            <CategoryChip
+              key={c}
+              label={c}
+              href={`/?category=${encodeURIComponent(c)}`}
+              active={category === c}
+            />
           ))}
         </div>
-      )}
-    </main>
+      </nav>
+
+      <main className="max-w-5xl mx-auto px-5 py-8">
+        {sarees.length === 0 ? (
+          <div className="text-center py-24">
+            <p className="font-display text-xl text-ink">
+              Nothing here just now
+            </p>
+            <p className="text-ink-soft mt-2 text-sm">
+              New stock arrives often — do check back.
+            </p>
+            {category && (
+              <Link href="/" className="btn btn-secondary mt-6">
+                See everything
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-ink-faint mb-5">
+              {sarees.length} {sarees.length === 1 ? 'saree' : 'sarees'}
+              {category ? ` in ${category}` : ' available'}
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8">
+              {sarees.map((s, i) => (
+                <Link
+                  key={s.id}
+                  href={`/s/${s.id}`}
+                  className="product-card group rise"
+                  style={{ animationDelay: `${Math.min(i * 45, 400)}ms` }}
+                >
+                  <div className="frame aspect-[3/4]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.photos[0] ?? ''}
+                      alt={s.name}
+                      loading={i < 6 ? 'eager' : 'lazy'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="pt-3">
+                    <p className="text-[0.8125rem] text-maroon-600 font-medium">
+                      {s.category}
+                    </p>
+                    <h2 className="font-display text-[1.0625rem] leading-snug text-ink mt-0.5 group-hover:text-maroon-700 transition-colors">
+                      {s.name}
+                    </h2>
+                    <p className="text-ink-soft mt-1 tabular-nums">
+                      ₹{Number(s.price).toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+      </main>
+
+      <footer className="mt-16 border-t border-line bg-surface/60">
+        <div className="max-w-5xl mx-auto px-5 py-10 text-center">
+          <p className="font-display text-lg text-maroon-800">
+            Sri Guru Raghavendra Fabrics
+          </p>
+          <p className="text-sm text-ink-soft mt-2">
+            No.3, Puja Classic Apartments, Chikkalasandra
+            <br />
+            Bangalore 560061
+          </p>
+          <a href="tel:+919663733683" className="btn btn-secondary mt-5">
+            Call +91 96637 33683
+          </a>
+        </div>
+      </footer>
+    </div>
   );
 }
 
@@ -73,14 +130,7 @@ function CategoryChip({
   active: boolean;
 }) {
   return (
-    <Link
-      href={href}
-      className={`shrink-0 px-4 py-2 rounded-full text-sm border ${
-        active
-          ? 'bg-brand-700 text-white border-brand-700'
-          : 'bg-white text-stone-700 border-stone-300'
-      }`}
-    >
+    <Link href={href} className={`chip ${active ? 'chip-active' : ''}`}>
       {label}
     </Link>
   );

@@ -20,7 +20,11 @@ export default async function EditSareePage({
   ]);
 
   if (error) {
-    return <p className="p-5 text-red-700">Could not load: {error.message}</p>;
+    return (
+      <p className="m-5 card p-4 text-sm text-bad bg-bad-bg">
+        Could not load: {error.message}
+      </p>
+    );
   }
   if (!data) notFound();
 

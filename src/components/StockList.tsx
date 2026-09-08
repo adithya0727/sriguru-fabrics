@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Share2, IndianRupee } from 'lucide-react';
+import { Share2, Search, ChevronRight } from 'lucide-react';
 import SoldSheet from './SoldSheet';
 
 type Row = {
@@ -24,82 +24,138 @@ export default function StockList({
   siteUrl: string;
 }) {
   const [selling, setSelling] = useState<Row | null>(null);
+  const [query, setQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sarees;
+    return sarees.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q),
+    );
+  }, [sarees, query]);
 
   if (sarees.length === 0) {
     return (
-      <p className="text-center text-stone-500 py-16 px-5">
-        No sarees yet. Tap <span className="font-medium">Add saree</span> below
-        to start.
-      </p>
+      <div className="text-center py-20 px-5">
+        <p className="font-display text-lg text-ink">No sarees yet</p>
+        <p className="text-sm text-ink-soft mt-2">
+          Tap <span className="text-maroon-700 font-medium">Add saree</span> below
+          to photograph your first one.
+        </p>
+      </div>
     );
   }
 
   return (
     <>
-      <ul className="divide-y divide-stone-200">
-        {sarees.map((s) => {
-          const url = `${siteUrl}/s/${s.id}`;
-          const message = `${s.name}\n₹${s.price.toLocaleString('en-IN')}\n${url}`;
-          const margin =
-            s.cost_price != null ? s.price - s.cost_price : null;
-
-          return (
-            <li key={s.id} className="flex gap-3 p-3 bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={s.photos[0] ?? ''}
-                alt=""
-                className="w-16 h-20 object-cover rounded-lg bg-stone-100 shrink-0"
-              />
-
-              <Link href={`/admin/s/${s.id}`} className="flex-1 min-w-0">
-                <p className="font-medium text-stone-900 truncate">{s.name}</p>
-                <p className="text-sm text-stone-500">{s.category}</p>
-                <p className="text-sm font-medium text-stone-900 mt-0.5">
-                  ₹{s.price.toLocaleString('en-IN')}
-                  {margin != null && (
-                    <span
-                      className={`ml-2 text-xs font-normal ${
-                        margin > 0 ? 'text-green-700' : 'text-red-700'
-                      }`}
-                    >
-                      {margin > 0 ? '+' : ''}₹{margin.toLocaleString('en-IN')}
-                    </span>
-                  )}
-                </p>
-                {s.quantity_total > 1 && (
-                  <p className="text-xs text-stone-500 mt-0.5">
-                    {s.quantity_available} of {s.quantity_total} left
-                  </p>
-                )}
-              </Link>
-
-              <div className="flex flex-col gap-1.5 shrink-0">
-                <button
-                  onClick={() => setSelling(s)}
-                  className="tap-target px-3 rounded-lg bg-brand-700 text-white text-sm font-medium flex items-center gap-1"
-                >
-                  <IndianRupee size={14} />
-                  Sold
-                </button>
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(message)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="tap-target px-3 rounded-lg border border-stone-300 text-stone-700 text-sm flex items-center gap-1"
-                >
-                  <Share2 size={14} />
-                  Send
-                </a>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-
-      {selling && (
-        <SoldSheet saree={selling} onClose={() => setSelling(null)} />
+      {/* Search appears once the rack is big enough to need it. */}
+      {sarees.length > 8 && (
+        <div className="px-5 pb-3">
+          <div className="relative">
+            <Search
+              size={17}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or type"
+              className="field pl-10"
+            />
+          </div>
+        </div>
       )}
+
+      {filtered.length === 0 ? (
+        <p className="text-center text-ink-soft py-16 text-sm">
+          Nothing matches “{query}”.
+        </p>
+      ) : (
+        <ul className="px-5 space-y-2.5">
+          {filtered.map((s) => {
+            const url = `${siteUrl}/s/${s.id}`;
+            const message = `${s.name}\n₹${s.price.toLocaleString('en-IN')}\n${url}`;
+            const margin = s.cost_price != null ? s.price - s.cost_price : null;
+
+            return (
+              <li key={s.id} className="card overflow-hidden">
+                <div className="flex gap-3.5 p-3">
+                  <Link href={`/admin/s/${s.id}`} className="frame w-16 h-20 shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={s.photos[0] ?? ''}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </Link>
+
+                  <Link
+                    href={`/admin/s/${s.id}`}
+                    className="flex-1 min-w-0 group"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-display text-[1.0625rem] leading-snug text-ink truncate group-hover:text-maroon-700 transition-colors">
+                        {s.name}
+                      </p>
+                      <ChevronRight
+                        size={16}
+                        className="text-ink-faint shrink-0 mt-1"
+                      />
+                    </div>
+                    <p className="text-[0.8125rem] text-maroon-600 mt-0.5">
+                      {s.category}
+                    </p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <span className="text-ink font-medium tabular-nums">
+                        ₹{s.price.toLocaleString('en-IN')}
+                      </span>
+                      {margin != null && (
+                        <span
+                          className={`text-xs tabular-nums ${
+                            margin > 0 ? 'text-good' : 'text-bad'
+                          }`}
+                        >
+                          {margin > 0 ? '+' : ''}
+                          {margin.toLocaleString('en-IN')} margin
+                        </span>
+                      )}
+                    </div>
+                    {s.quantity_total > 1 && (
+                      <p className="text-xs text-ink-faint mt-1">
+                        {s.quantity_available} of {s.quantity_total} left
+                      </p>
+                    )}
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 border-t border-line">
+                  <button
+                    onClick={() => setSelling(s)}
+                    className="py-3 text-sm font-medium text-maroon-700 hover:bg-maroon-50 transition-colors border-r border-line"
+                  >
+                    Mark sold
+                  </button>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(message)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-3 text-sm font-medium text-ink-soft hover:bg-canvas-warm transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Share2 size={14} />
+                    Send
+                  </a>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {selling && <SoldSheet saree={selling} onClose={() => setSelling(null)} />}
     </>
   );
 }

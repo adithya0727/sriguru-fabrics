@@ -6,7 +6,7 @@ import { getBrowserClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-brand-50" />}>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <LoginForm />
     </Suspense>
   );
@@ -52,9 +52,8 @@ function LoginForm() {
 
     // The sign-in call resolves before the auth cookie is guaranteed readable
     // by the server. Navigating immediately can race the cookie write, and the
-    // proxy then bounces straight back to this page — which looks to the user
-    // like the login silently did nothing. Confirm the session is actually
-    // readable back before moving on.
+    // proxy then bounces straight back here — which looks like the login
+    // silently did nothing. Confirm the session reads back first.
     const { data: check } = await supabase.auth.getSession();
     if (!check.session) {
       setError(
@@ -70,53 +69,62 @@ function LoginForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-5 bg-brand-50">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-brand-100 p-6"
-      >
-        <h1 className="text-xl font-semibold text-brand-800">
-          Sri Guru Raya Fabrics
-        </h1>
-        <p className="text-sm text-stone-500 mt-1 mb-6">Stock register</p>
+    <main className="min-h-screen flex items-center justify-center px-5 py-10">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm rise">
+        <div className="text-center mb-8">
+          <p className="eyebrow mb-3">Stock register</p>
+          <h1 className="font-display text-2xl leading-tight text-maroon-900">
+            Sri Guru Raghavendra
+            <span className="block text-maroon-700">Fabrics</span>
+          </h1>
+        </div>
 
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
-          Email
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="username"
-          className="tap-target w-full px-3 rounded-lg border border-stone-300 mb-4 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
-        />
+        <div className="card p-6">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-ink mb-1.5"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="username"
+            className="field mb-4"
+          />
 
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">
-          Password
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-          className="tap-target w-full px-3 rounded-lg border border-stone-300 mb-5 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
-        />
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-ink mb-1.5"
+          >
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            className="field mb-5"
+          />
 
-        {error && (
-          <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
-            {error}
-          </p>
-        )}
+          {error && (
+            <p
+              role="alert"
+              className="text-sm text-bad bg-bad-bg border border-bad/20 rounded-lg px-3 py-2.5 mb-4 leading-relaxed"
+            >
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="tap-target w-full rounded-lg bg-brand-700 text-white font-medium disabled:opacity-60"
-        >
-          {busy ? 'Signing in…' : 'Sign in'}
-        </button>
+          <button type="submit" disabled={busy} className="btn btn-primary w-full">
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </div>
       </form>
     </main>
   );

@@ -21,17 +21,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sold = saree.quantity_available <= 0;
   const price = `₹${Number(saree.price).toLocaleString('en-IN')}`;
 
-  // WhatsApp reads these tags off the server-rendered HTML to build the preview
-  // card in the chat. Without them a shared link is a bare grey rectangle.
+  // WhatsApp builds its preview card from these tags, read off the
+  // server-rendered HTML. Without them a shared link is a bare grey rectangle.
   return {
-    title: `${saree.name} — ${price}`,
+    title: sold ? `${saree.name} (sold)` : `${saree.name} — ${price}`,
     description: sold
       ? `${saree.name} has been sold. See what else is available.`
       : saree.description || `${saree.category} saree — ${price}`,
     openGraph: {
-      title: sold ? `${saree.name} (sold)` : `${saree.name} — ${price}`,
-      description: saree.description,
-      images: saree.photos[0] ? [{ url: saree.photos[0] }] : [],
+      title: sold ? `${saree.name} — sold` : `${saree.name} — ${price}`,
+      description: saree.description || `${saree.category} saree`,
+      images: saree.photos[0]
+        ? [{ url: saree.photos[0], width: 1200, height: 1600, alt: saree.name }]
+        : [],
       type: 'website',
     },
   };
@@ -51,118 +53,160 @@ export default async function SareePage({ params }: Props) {
       `${getSiteUrl()}/s/${saree.id}`,
   );
 
+  const details = [
+    saree.fabric && { label: 'Fabric', value: saree.fabric },
+    saree.border && { label: 'Border', value: saree.border },
+    saree.colors.length > 0 && { label: 'Colour', value: saree.colors.join(', ') },
+    saree.motifs.length > 0 && { label: 'Motif', value: saree.motifs.join(', ') },
+    { label: 'Blouse piece', value: saree.has_blouse ? 'Included' : 'Not included' },
+    saree.occasion && { label: 'Best for', value: saree.occasion },
+  ].filter(Boolean) as { label: string; value: string }[];
+
   return (
-    <main className="max-w-lg mx-auto bg-white min-h-screen">
-      <div className="relative">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={saree.photos[0] ?? ''}
-          alt={saree.name}
-          className={`w-full aspect-[3/4] object-cover ${sold ? 'grayscale opacity-60' : ''}`}
-        />
-        {sold && (
-          <div className="absolute top-4 left-4 bg-stone-900 text-white text-sm font-medium px-3 py-1.5 rounded-full">
-            Sold
+    <div className="min-h-screen pb-28">
+      <header className="max-w-lg mx-auto px-5 pt-5">
+        <Link
+          href="/"
+          className="text-sm text-ink-soft hover:text-maroon-700 transition-colors"
+        >
+          ← All sarees
+        </Link>
+      </header>
+
+      <main className="max-w-lg mx-auto px-5 pt-4">
+        <div className="frame aspect-[3/4] rise">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={saree.photos[0] ?? ''}
+            alt={saree.name}
+            className={`w-full h-full object-cover ${sold ? 'grayscale-[0.7] opacity-70' : ''}`}
+          />
+          {sold && (
+            <div className="absolute top-4 left-4 bg-ink/90 text-white text-xs font-medium tracking-wide uppercase px-3 py-1.5 rounded-full backdrop-blur-sm">
+              Sold
+            </div>
+          )}
+        </div>
+
+        {saree.photos.length > 1 && (
+          <div className="flex gap-2.5 mt-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {saree.photos.slice(1).map((url) => (
+              <div key={url} className="frame w-24 h-32 shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
           </div>
         )}
-      </div>
 
-      {saree.photos.length > 1 && (
-        <div className="flex gap-2 p-3 overflow-x-auto">
-          {saree.photos.slice(1).map((url) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={url}
-              src={url}
-              alt=""
-              className="w-24 h-32 object-cover rounded-lg shrink-0"
-            />
-          ))}
+        <div className="mt-7 rise" style={{ animationDelay: '90ms' }}>
+          <p className="eyebrow">{saree.category}</p>
+          <h1 className="font-display text-[1.75rem] leading-tight text-maroon-900 mt-2">
+            {saree.name}
+          </h1>
+          <p className="font-display text-2xl text-ink mt-3 tabular-nums">
+            ₹{price}
+          </p>
+
+          {saree.description && (
+            <p className="text-ink-soft leading-relaxed mt-4">
+              {saree.description}
+            </p>
+          )}
+
+          <div className="rule-fade my-7" />
+
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-5">
+            {details.map((d) => (
+              <div key={d.label}>
+                <dt className="text-[0.6875rem] uppercase tracking-wider text-ink-faint">
+                  {d.label}
+                </dt>
+                <dd className="text-ink mt-1 capitalize">{d.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {sold && (
+          <section className="mt-10 rise">
+            <div className="card p-5 text-center">
+              <p className="font-display text-lg text-ink">This one has sold</p>
+              <p className="text-sm text-ink-soft mt-1.5">
+                Each saree is bought in small numbers, so they do go quickly.
+              </p>
+            </div>
+
+            {similar.length > 0 && (
+              <>
+                <h2 className="font-display text-lg text-maroon-800 mt-8 mb-4">
+                  Still available
+                </h2>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+                  {similar.map((s) => (
+                    <Link
+                      key={s.id}
+                      href={`/s/${s.id}`}
+                      className="product-card group"
+                    >
+                      <div className="frame aspect-[3/4]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={s.photos[0] ?? ''}
+                          alt={s.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <p className="font-display text-[0.9375rem] text-ink mt-2 leading-snug group-hover:text-maroon-700 transition-colors">
+                        {s.name}
+                      </p>
+                      <p className="text-sm text-ink-soft tabular-nums">
+                        ₹{Number(s.price).toLocaleString('en-IN')}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <Link href="/" className="btn btn-secondary w-full mt-7">
+              See the whole collection
+            </Link>
+          </section>
+        )}
+
+        <p className="text-xs text-ink-faint text-center mt-12 leading-relaxed">
+          Sri Guru Raghavendra Fabrics
+          <br />
+          Chikkalasandra, Bangalore
+        </p>
+      </main>
+
+      {/* Sticky so the enquiry is always one thumb-reach away, however far
+          down the page someone has read. */}
+      {!sold && (
+        <div className="fixed bottom-0 inset-x-0 z-30 bg-canvas/90 backdrop-blur-md border-t border-line">
+          <div className="max-w-lg mx-auto px-5 py-3 flex items-center gap-4">
+            <div className="min-w-0">
+              <p className="text-[0.6875rem] uppercase tracking-wider text-ink-faint">
+                Price
+              </p>
+              <p className="font-display text-lg text-ink tabular-nums leading-tight">
+                ₹{price}
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${enquiry}`}
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-whatsapp flex-1"
+            >
+              Enquire on WhatsApp
+            </a>
+          </div>
         </div>
       )}
-
-      <div className="px-5 py-5">
-        <p className="text-sm text-brand-700 font-medium">{saree.category}</p>
-        <h1 className="text-2xl font-semibold text-stone-900 mt-1">
-          {saree.name}
-        </h1>
-        <p className="text-2xl font-semibold text-stone-900 mt-3">₹{price}</p>
-
-        {saree.description && (
-          <p className="text-stone-600 mt-4 leading-relaxed">
-            {saree.description}
-          </p>
-        )}
-
-        <dl className="mt-5 grid grid-cols-2 gap-y-3 text-sm">
-          {saree.fabric && <Detail label="Fabric" value={saree.fabric} />}
-          {saree.border && <Detail label="Border" value={saree.border} />}
-          {saree.colors.length > 0 && (
-            <Detail label="Colour" value={saree.colors.join(', ')} />
-          )}
-          <Detail
-            label="Blouse piece"
-            value={saree.has_blouse ? 'Included' : 'Not included'}
-          />
-        </dl>
-
-        {sold ? (
-          <div className="mt-8">
-            <p className="text-stone-600 mb-4">
-              This one has been sold.
-              {similar.length > 0 && ' Here is what else is available:'}
-            </p>
-            {similar.length > 0 && (
-              <div className="grid grid-cols-2 gap-3">
-                {similar.map((s) => (
-                  <Link key={s.id} href={`/s/${s.id}`} className="block">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photos[0] ?? ''}
-                      alt={s.name}
-                      className="w-full aspect-[3/4] object-cover rounded-lg"
-                    />
-                    <p className="text-sm font-medium text-stone-900 mt-1.5 truncate">
-                      {s.name}
-                    </p>
-                    <p className="text-sm text-stone-600">
-                      ₹{Number(s.price).toLocaleString('en-IN')}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            )}
-            <Link
-              href="/"
-              className="tap-target mt-5 flex items-center justify-center w-full rounded-xl border border-brand-700 text-brand-700 font-medium"
-            >
-              See the full collection
-            </Link>
-          </div>
-        ) : (
-          <a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${enquiry}`}
-            target="_blank"
-            rel="noreferrer"
-            className="tap-target mt-8 flex items-center justify-center w-full rounded-xl bg-green-600 text-white font-medium py-4"
-          >
-            Enquire on WhatsApp
-          </a>
-        )}
-
-        <p className="text-xs text-stone-400 text-center mt-6">
-          Sri Guru Raya Fabrics · Chikkalasandra, Bangalore
-        </p>
-      </div>
-    </main>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-stone-500">{label}</dt>
-      <dd className="text-stone-900 capitalize">{value}</dd>
     </div>
   );
 }

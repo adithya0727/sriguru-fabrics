@@ -1,4 +1,4 @@
-# Sri Guru Raya Fabrics
+# Sri Guru Raghavendra Fabrics
 
 Stock register and shareable catalogue for a family saree business in
 Chikkalasandra, Bangalore.

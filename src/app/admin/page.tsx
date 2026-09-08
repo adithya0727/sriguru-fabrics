@@ -1,6 +1,6 @@
 import { getSessionClient } from '@/lib/supabase/server';
-import StockList from '@/components/StockList';
 import { getSiteUrl } from '@/lib/site-url';
+import StockList from '@/components/StockList';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,30 +17,55 @@ export default async function StockPage() {
 
   if (error) {
     return (
-      <p className="p-5 text-red-700">Could not load stock: {error.message}</p>
+      <p className="m-5 card p-4 text-sm text-bad bg-bad-bg">
+        Could not load stock: {error.message}
+      </p>
     );
   }
 
-  const sarees = data ?? [];
+  const sarees = (data ?? []).map((s) => ({
+    ...s,
+    price: Number(s.price),
+    cost_price: s.cost_price != null ? Number(s.cost_price) : null,
+  }));
+
+  const pieces = sarees.reduce((n, s) => n + s.quantity_available, 0);
   const stockValue = sarees.reduce(
-    (sum, s) => sum + Number(s.price) * s.quantity_available,
+    (sum, s) => sum + s.price * s.quantity_available,
     0,
   );
 
   return (
-    <div>
-      <header className="px-5 pt-6 pb-4 bg-white border-b border-stone-200">
-        <h1 className="text-xl font-semibold text-stone-900">Stock</h1>
-        <p className="text-sm text-stone-500 mt-0.5">
-          {sarees.length} designs · ₹{stockValue.toLocaleString('en-IN')} on the
-          rack
-        </p>
+    <div className="max-w-lg mx-auto">
+      <header className="px-5 pt-8 pb-5">
+        <p className="eyebrow mb-2">Stock register</p>
+        <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight">
+          On the rack
+        </h1>
+        <div className="flex gap-6 mt-4">
+          <div>
+            <p className="font-display text-xl text-ink tabular-nums">
+              {sarees.length}
+            </p>
+            <p className="text-xs text-ink-faint">
+              {sarees.length === 1 ? 'design' : 'designs'}
+            </p>
+          </div>
+          <div>
+            <p className="font-display text-xl text-ink tabular-nums">{pieces}</p>
+            <p className="text-xs text-ink-faint">pieces</p>
+          </div>
+          <div>
+            <p className="font-display text-xl text-ink tabular-nums">
+              ₹{stockValue.toLocaleString('en-IN')}
+            </p>
+            <p className="text-xs text-ink-faint">at asking price</p>
+          </div>
+        </div>
+        <div className="rule-fade mt-5" />
       </header>
 
-      <StockList
-        sarees={sarees.map((s) => ({ ...s, price: Number(s.price), cost_price: s.cost_price != null ? Number(s.cost_price) : null }))}
-        siteUrl={getSiteUrl()}
-      />
+      <StockList sarees={sarees} siteUrl={getSiteUrl()} />
     </div>
   );
 }

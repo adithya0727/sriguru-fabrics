@@ -57,7 +57,7 @@ const TagSchema = z.object({
 });
 
 const SYSTEM_PROMPT = `
-You catalogue sarees for Sri Guru Raya Fabrics, a family saree business
+You catalogue sarees for Sri Guru Raghavendra Fabrics, a family saree business
 in Chikkalasandra, Bangalore. You are shown photographs of one saree and you
 fill in its listing.
 

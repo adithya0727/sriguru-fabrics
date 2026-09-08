@@ -87,15 +87,15 @@ export default function EditSareeForm({
   }
 
   return (
-    <div className="px-5 py-6">
+    <div className="max-w-lg mx-auto px-5 py-8">
       <Link
         href="/admin"
-        className="inline-flex items-center gap-1 text-sm text-stone-500 mb-4"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-maroon-700 transition-colors mb-4"
       >
         <ArrowLeft size={16} /> Back to stock
       </Link>
 
-      <h1 className="text-xl font-semibold text-stone-900 mb-5">Edit saree</h1>
+      <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight mb-5">Edit saree</h1>
 
       {saree.photos.length > 0 && (
         <div className="flex gap-2 mb-5 overflow-x-auto">
@@ -105,20 +105,20 @@ export default function EditSareeForm({
               key={url}
               src={url}
               alt=""
-              className="w-20 h-24 object-cover rounded-lg shrink-0 border border-stone-200"
+              className="w-20 h-24 object-cover rounded-lg shrink-0"
             />
           ))}
         </div>
       )}
 
-      <div className="bg-white border border-stone-200 rounded-xl p-4 mb-4 space-y-4">
+      <div className="card p-5 mb-4 space-y-4">
         <Row label="Selling price (₹)">
           <input
             type="number"
             inputMode="numeric"
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 text-lg font-medium outline-none focus:border-brand-600"
+            className="field text-lg font-medium"
           />
         </Row>
         <Row label="What we paid (₹)" hint="Only we see this.">
@@ -127,7 +127,7 @@ export default function EditSareeForm({
             inputMode="numeric"
             value={form.cost_price}
             onChange={(e) => setForm({ ...form, cost_price: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+            className="field"
           />
         </Row>
         <div className="grid grid-cols-2 gap-3">
@@ -140,7 +140,7 @@ export default function EditSareeForm({
               onChange={(e) =>
                 setForm({ ...form, quantity_available: e.target.value })
               }
-              className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+              className="field"
             />
           </Row>
           <Row label="Bought in total">
@@ -152,18 +152,18 @@ export default function EditSareeForm({
               onChange={(e) =>
                 setForm({ ...form, quantity_total: e.target.value })
               }
-              className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+              className="field"
             />
           </Row>
         </div>
       </div>
 
-      <div className="bg-white border border-stone-200 rounded-xl p-4 mb-4 space-y-4">
+      <div className="card p-5 mb-4 space-y-4">
         <Row label="Name">
           <input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+            className="field"
           />
         </Row>
         <Row label="Description">
@@ -171,14 +171,14 @@ export default function EditSareeForm({
             rows={3}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+            className="field"
           />
         </Row>
         <Row label="Type">
           <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
-            className="tap-target w-full px-3 rounded-lg border border-stone-300 bg-white outline-none focus:border-brand-600"
+            className="field"
           >
             {categories.map((c) => (
               <option key={c} value={c}>
@@ -192,14 +192,14 @@ export default function EditSareeForm({
             <input
               value={form.fabric}
               onChange={(e) => setForm({ ...form, fabric: e.target.value })}
-              className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+              className="field"
             />
           </Row>
           <Row label="Border">
             <input
               value={form.border}
               onChange={(e) => setForm({ ...form, border: e.target.value })}
-              className="tap-target w-full px-3 rounded-lg border border-stone-300 outline-none focus:border-brand-600"
+              className="field"
             />
           </Row>
         </div>
@@ -208,14 +208,14 @@ export default function EditSareeForm({
             type="checkbox"
             checked={form.has_blouse}
             onChange={(e) => setForm({ ...form, has_blouse: e.target.checked })}
-            className="w-5 h-5 accent-brand-700"
+            className="w-5 h-5 accent-maroon-700"
           />
-          <span className="text-sm text-stone-700">Blouse piece included</span>
+          <span className="text-sm text-ink">Blouse piece included</span>
         </label>
       </div>
 
       {error && (
-        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+        <p className="text-sm text-bad bg-bad-bg border border-bad/20 rounded-lg px-3 py-2.5 mb-4">
           {error}
         </p>
       )}
@@ -223,27 +223,27 @@ export default function EditSareeForm({
       <button
         onClick={save}
         disabled={busy}
-        className="tap-target w-full rounded-xl bg-brand-700 text-white font-medium py-4 mb-3 disabled:opacity-60"
+        className="btn btn-primary w-full mb-3"
       >
         {busy ? 'Saving…' : 'Save changes'}
       </button>
 
       {confirmDelete ? (
-        <div className="border border-red-200 bg-red-50 rounded-xl p-4">
-          <p className="text-sm text-red-800 mb-3">
+        <div className="card border-bad/25 bg-bad-bg p-4">
+          <p className="text-sm text-bad mb-3">
             Delete this saree permanently?
           </p>
           <div className="flex gap-2">
             <button
               onClick={remove}
               disabled={busy}
-              className="tap-target flex-1 rounded-lg bg-red-700 text-white text-sm font-medium"
+              className="btn flex-1 bg-bad text-white text-sm"
             >
               Yes, delete
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="tap-target flex-1 rounded-lg border border-stone-300 text-stone-700 text-sm"
+              className="btn btn-secondary flex-1 text-sm"
             >
               Cancel
             </button>
@@ -252,7 +252,7 @@ export default function EditSareeForm({
       ) : (
         <button
           onClick={() => setConfirmDelete(true)}
-          className="tap-target w-full flex items-center justify-center gap-2 rounded-xl border border-red-200 text-red-700 text-sm"
+          className="btn w-full border border-bad/25 text-bad text-sm hover:bg-bad-bg"
         >
           <Trash2 size={16} />
           Delete saree
@@ -273,11 +273,11 @@ function Row({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-stone-700 mb-1.5">
+      <label className="block text-sm font-medium text-ink mb-1.5">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-stone-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-ink-soft mt-1.5">{hint}</p>}
     </div>
   );
 }
