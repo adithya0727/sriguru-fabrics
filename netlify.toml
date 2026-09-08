@@ -14,3 +14,16 @@
 [build.environment]
   # Next 16 needs a modern Node; Netlify's default can lag behind.
   NODE_VERSION = "22"
+
+  # Netlify's secret scanner flags anything from the environment that appears
+  # in build output. These two are *supposed* to appear there — the
+  # NEXT_PUBLIC_ prefix means "send to the browser", and the app cannot reach
+  # Supabase from a phone without them. The publishable key is safe to expose
+  # because row-level security denies it access to every table; public pages
+  # are served by the server using the secret key and an explicit column list
+  # (see src/lib/queries.ts).
+  #
+  # Scanning stays ON for SUPABASE_SERVICE_ROLE_KEY and ANTHROPIC_API_KEY.
+  # Those must never reach the browser, and a failed build is exactly what
+  # should happen if they ever do.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY"
