@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Share2, Search, ChevronRight } from 'lucide-react';
+import { Share2, Search, ChevronRight, Layers } from 'lucide-react';
 import SoldSheet from './SoldSheet';
+import SendByTypeSheet from './SendByTypeSheet';
 
 type Row = {
   id: string;
@@ -24,6 +25,7 @@ export default function StockList({
   siteUrl: string;
 }) {
   const [selling, setSelling] = useState<Row | null>(null);
+  const [sendingType, setSendingType] = useState(false);
   const [query, setQuery] = useState('');
 
   // The server's idea of the site URL comes from configuration, which can be
@@ -58,6 +60,16 @@ export default function StockList({
 
   return (
     <>
+      <div className="px-5 pb-3">
+        <button
+          onClick={() => setSendingType(true)}
+          className="btn btn-secondary w-full"
+        >
+          <Layers size={16} />
+          Send a whole type
+        </button>
+      </div>
+
       {/* Search appears once the rack is big enough to need it. */}
       {sarees.length > 8 && (
         <div className="px-5 pb-3">
@@ -165,6 +177,14 @@ export default function StockList({
       )}
 
       {selling && <SoldSheet saree={selling} onClose={() => setSelling(null)} />}
+
+      {sendingType && (
+        <SendByTypeSheet
+          sarees={sarees}
+          origin={origin}
+          onClose={() => setSendingType(false)}
+        />
+      )}
     </>
   );
 }
