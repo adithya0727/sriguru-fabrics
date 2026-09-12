@@ -71,7 +71,7 @@ export default function StockList({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by name or type"
-              className="field pl-10"
+              className="field field-icon"
             />
           </div>
         </div>

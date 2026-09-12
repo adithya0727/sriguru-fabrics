@@ -115,7 +115,7 @@ export default function SoldSheet({
           Sold for
         </label>
         <div className="relative mb-4">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
+          <span className="field-prefix">
             ₹
           </span>
           <input
@@ -123,7 +123,7 @@ export default function SoldSheet({
             inputMode="numeric"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="field pl-8 text-lg font-medium"
+            className="field field-money text-lg font-medium"
           />
         </div>
 

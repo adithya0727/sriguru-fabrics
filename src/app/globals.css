@@ -227,6 +227,30 @@ textarea.field {
   resize: vertical;
 }
 
+/* Inputs with something sitting inside them — a ₹ sign, a search icon — need
+   their text to start clear of it, or the two overlap as soon as you type.
+
+   The padding lives here rather than on a `pl-*` utility: .field is unlayered
+   and Tailwind's utilities are in @layer utilities, so unlayered wins and a
+   padding utility on a .field silently does nothing. */
+.field-money {
+  padding-left: 2rem;
+}
+.field-icon {
+  padding-left: 2.625rem;
+}
+
+/* The thing sitting inside. Not interactive — tapping the ₹ should put the
+   cursor in the field rather than swallow the tap. */
+.field-prefix {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-ink-faint);
+  pointer-events: none;
+}
+
 /* A field the tagger was unsure about. */
 .field-flagged {
   border-color: var(--color-gold-300);

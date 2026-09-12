@@ -1,12 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Camera, Images, Check, Share2, AlertCircle, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Camera, Images, AlertCircle, Sparkles } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
 import { prepareSareePhoto } from '@/lib/photos';
 import type { TaggedAttributes } from '@/lib/types';
 
-type Stage = 'photos' | 'working' | 'review' | 'saved';
+type Stage = 'photos' | 'working' | 'review';
 
 type Draft = TaggedAttributes & {
   price: string;
@@ -32,14 +33,15 @@ const EMPTY_DRAFT: Draft = {
 };
 
 export default function AddSareeForm({ categories }: { categories: string[] }) {
+  const router = useRouter();
   const [stage, setStage] = useState<Stage>('photos');
   const [previews, setPreviews] = useState<string[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
-  const [savedId, setSavedId] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [autoFilled, setAutoFilled] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -130,10 +132,11 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
       return;
     }
 
+    setSaving(true);
     const quantity = Math.max(1, Number(draft.quantity_total) || 1);
     const supabase = getBrowserClient();
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('sarees')
       .insert({
         name: draft.name || 'Untitled saree',
@@ -152,66 +155,21 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
         quantity_total: quantity,
         quantity_available: quantity,
         low_confidence: draft.low_confidence,
-      })
-      .select('id')
-      .single();
+      });
 
     if (error) {
       setError(`Could not save: ${error.message}`);
+      setSaving(false);
       return;
     }
 
-    setSavedId(data.id);
-    setStage('saved');
-  }
-
-  function reset() {
-    setStage('photos');
-    setPreviews([]);
-    setPhotoUrls([]);
-    setDraft(EMPTY_DRAFT);
-    setSavedId(null);
-    setNote(null);
-    setError(null);
-    setAutoFilled(false);
+    // Straight back to the rack. The saree is in the register and its own
+    // Send button is on the row, so there is nothing to confirm on the way.
+    router.push('/admin');
+    router.refresh();
   }
 
   // ---------------------------------------------------------------- rendering
-
-  if (stage === 'saved' && savedId) {
-    const url = `${window.location.origin}/s/${savedId}`;
-    const message = `${draft.name}\n₹${Number(draft.price).toLocaleString('en-IN')}\n${url}`;
-    return (
-      <div className="max-w-lg mx-auto px-5 py-12 text-center rise">
-        <div className="mx-auto w-14 h-14 rounded-full bg-good-bg flex items-center justify-center mb-5">
-          <Check className="text-good" size={26} strokeWidth={2.5} />
-        </div>
-        <h1 className="font-display text-2xl text-maroon-900">Saved</h1>
-        <p className="text-ink-soft mt-2 mb-7 leading-relaxed">
-          This link looks after itself — if the saree sells, anyone who opens it
-          later sees that, along with other sarees to look at.
-        </p>
-
-        <div className="card px-4 py-3 text-sm text-ink-soft break-all mb-4">
-          {url}
-        </div>
-
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(message)}`}
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-whatsapp w-full mb-3"
-        >
-          <Share2 size={17} />
-          Send on WhatsApp
-        </a>
-
-        <button onClick={reset} className="btn btn-secondary w-full">
-          Add another saree
-        </button>
-      </div>
-    );
-  }
 
   if (stage === 'photos') {
     return (
@@ -352,7 +310,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
 
         <Field label="Selling price" required>
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
+            <span className="field-prefix">
               ₹
             </span>
             <input
@@ -361,14 +319,14 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
               autoFocus
               value={draft.price}
               onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-              className="field pl-8 text-lg font-medium"
+              className="field field-money text-lg font-medium"
             />
           </div>
         </Field>
 
         <Field label="What we paid" hint="Only we see this. Used for profit.">
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
+            <span className="field-prefix">
               ₹
             </span>
             <input
@@ -376,7 +334,7 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
               inputMode="numeric"
               value={draft.cost_price}
               onChange={(e) => setDraft({ ...draft, cost_price: e.target.value })}
-              className="field pl-8"
+              className="field field-money"
             />
           </div>
         </Field>
@@ -468,8 +426,12 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
         </p>
       )}
 
-      <button onClick={handleSave} className="btn btn-primary w-full mt-6">
-        Save saree
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="btn btn-primary w-full mt-6"
+      >
+        {saving ? 'Saving…' : 'Save saree'}
       </button>
     </div>
   );
