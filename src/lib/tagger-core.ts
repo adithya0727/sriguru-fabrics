@@ -19,8 +19,12 @@ const TagSchema = z.object({
   name: z
     .string()
     .describe(
-      'Short product name, 2-5 words, in the shop\'s plain style. ' +
-        'e.g. "Gadwal Semi Silk — Green" or "Ilkal Cotton — Red Pallu".',
+      'Short product name, 2-4 words, in the shop\'s plain style — the colour ' +
+        'and whatever stands out. e.g. "Peacock Blue with Golden Butta" or ' +
+        '"Red Pallu, Green Body". Do NOT include the saree type (Gadwal, ' +
+        'Ilkal, Paithani, Chiffon and so on): it is recorded separately in ' +
+        'category and is displayed right beside the name, so naming it here ' +
+        'prints it twice.',
     ),
   description: z
     .string()

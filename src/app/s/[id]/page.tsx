@@ -22,18 +22,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const price = `₹${Number(saree.price).toLocaleString('en-IN')}`;
   const siteUrl = await getSiteUrl();
 
+  // The whole card, in one line: what it is, what type, what it costs. This
+  // sits directly under the photo in WhatsApp, and the shared message carries
+  // nothing but the link — so this line is the only place the details appear
+  // and anything added here is read twice.
+  const headline = `${saree.name} (${saree.category}) — ${sold ? 'sold' : price}`;
+
   // WhatsApp builds its preview card from these tags, read off the
   // server-rendered HTML. Without them a shared link is a bare grey rectangle.
   return {
     metadataBase: new URL(siteUrl),
-    title: sold ? `${saree.name} (sold)` : `${saree.name} — ${price}`,
-    description: sold
-      ? `${saree.name} has been sold. See what else is available.`
-      : saree.description || `${saree.category} saree — ${price}`,
+    title: headline,
+    // No description anywhere, which takes an explicit null: omitting it
+    // inherits the site-wide description from the root layout, and an empty
+    // string is treated as unset and inherits too. WhatsApp prints whatever
+    // survives as a second line under the headline, and og:description falls
+    // back to this one — so null here is what keeps the card to photo and
+    // headline. The cost is no meta description for search, which Google
+    // fills in from the page itself.
+    description: null,
     alternates: { canonical: `/s/${saree.id}` },
     openGraph: {
-      title: sold ? `${saree.name} — sold` : `${saree.name} — ${price}`,
-      description: saree.description || `${saree.category} saree`,
+      title: headline,
       // Stated outright rather than left to be inferred: WhatsApp caches a
       // preview against this URL, so it has to be the shareable one.
       url: `${siteUrl}/s/${saree.id}`,

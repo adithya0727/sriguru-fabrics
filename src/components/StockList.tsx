@@ -85,7 +85,6 @@ export default function StockList({
         <ul className="px-5 space-y-2.5">
           {filtered.map((s) => {
             const url = `${origin}/s/${s.id}`;
-            const message = `${s.name}\n₹${s.price.toLocaleString('en-IN')}\n${url}`;
             const margin = s.cost_price != null ? s.price - s.cost_price : null;
 
             return (
@@ -146,8 +145,11 @@ export default function StockList({
                   >
                     Mark sold
                   </button>
+                  {/* The link and nothing else. WhatsApp expands it into a
+                      card with the photo, name, type and price, so sending
+                      those as text too would just print them twice. */}
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(message)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(url)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="py-3 text-sm font-medium text-ink-soft hover:bg-canvas-warm transition-colors flex items-center justify-center gap-1.5"
