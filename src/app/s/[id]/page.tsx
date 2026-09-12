@@ -20,17 +20,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const sold = saree.quantity_available <= 0;
   const price = `₹${Number(saree.price).toLocaleString('en-IN')}`;
+  const siteUrl = await getSiteUrl();
 
   // WhatsApp builds its preview card from these tags, read off the
   // server-rendered HTML. Without them a shared link is a bare grey rectangle.
   return {
+    metadataBase: new URL(siteUrl),
     title: sold ? `${saree.name} (sold)` : `${saree.name} — ${price}`,
     description: sold
       ? `${saree.name} has been sold. See what else is available.`
       : saree.description || `${saree.category} saree — ${price}`,
+    alternates: { canonical: `/s/${saree.id}` },
     openGraph: {
       title: sold ? `${saree.name} — sold` : `${saree.name} — ${price}`,
       description: saree.description || `${saree.category} saree`,
+      // Stated outright rather than left to be inferred: WhatsApp caches a
+      // preview against this URL, so it has to be the shareable one.
+      url: `${siteUrl}/s/${saree.id}`,
       images: saree.photos[0]
         ? [{ url: saree.photos[0], width: 1200, height: 1600, alt: saree.name }]
         : [],
@@ -47,10 +53,11 @@ export default async function SareePage({ params }: Props) {
   const sold = saree.quantity_available <= 0;
   const similar = sold ? await getSimilarSarees(saree) : [];
   const price = Number(saree.price).toLocaleString('en-IN');
+  const siteUrl = await getSiteUrl();
 
   const enquiry = encodeURIComponent(
     `Hello, I'm interested in this saree:\n${saree.name}\n₹${price}\n` +
-      `${getSiteUrl()}/s/${saree.id}`,
+      `${siteUrl}/s/${saree.id}`,
   );
 
   const details = [

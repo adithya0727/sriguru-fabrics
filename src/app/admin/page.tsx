@@ -65,7 +65,7 @@ export default async function StockPage() {
         <div className="rule-fade mt-5" />
       </header>
 
-      <StockList sarees={sarees} siteUrl={getSiteUrl()} />
+      <StockList sarees={sarees} siteUrl={await getSiteUrl()} />
     </div>
   );
 }

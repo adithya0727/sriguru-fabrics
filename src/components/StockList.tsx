@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Share2, Search, ChevronRight } from 'lucide-react';
 import SoldSheet from './SoldSheet';
@@ -25,6 +25,13 @@ export default function StockList({
 }) {
   const [selling, setSelling] = useState<Row | null>(null);
   const [query, setQuery] = useState('');
+
+  // The server's idea of the site URL comes from configuration, which can be
+  // stale or missing on a deploy. The browser is standing on the real domain,
+  // so once mounted it is the better authority. Set after mount rather than
+  // during render, so the first paint still matches what the server sent.
+  const [origin, setOrigin] = useState(siteUrl);
+  useEffect(() => setOrigin(window.location.origin), []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -77,7 +84,7 @@ export default function StockList({
       ) : (
         <ul className="px-5 space-y-2.5">
           {filtered.map((s) => {
-            const url = `${siteUrl}/s/${s.id}`;
+            const url = `${origin}/s/${s.id}`;
             const message = `${s.name}\n₹${s.price.toLocaleString('en-IN')}\n${url}`;
             const margin = s.cost_price != null ? s.price - s.cost_price : null;
 

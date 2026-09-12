@@ -59,7 +59,7 @@ Fill it in from **Project Settings → API Keys**:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Settings → API Keys → **Publishable key** (`sb_publishable_…`) | Safe in the browser |
 | `SUPABASE_SERVICE_ROLE_KEY` | Settings → API Keys → **Secret key** (`sb_secret_…`) | **Server only.** Bypasses all security rules |
 | `ANTHROPIC_API_KEY` | console.anthropic.com | **Server only.** Spends money per call |
-| `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` for now | Becomes the real domain after deploying |
+| `NEXT_PUBLIC_SITE_URL` | Leave unset unless you need to force one domain | Optional. Shareable links default to the domain the page was served on |
 
 Supabase renamed these keys: **publishable** is what older guides call `anon`,
 and **secret** is what they call `service_role`. The variable names in this
@@ -89,9 +89,11 @@ the details before this is in your parents' hands.
 
 1. Push the branch and import the repo at [vercel.com](https://vercel.com).
 2. Add all five environment variables in **Settings → Environment Variables**.
-3. Deploy, then set `NEXT_PUBLIC_SITE_URL` to the real URL and redeploy —
-   shareable links are built from it, so until it's right they'll point at
-   localhost.
+3. Leave `NEXT_PUBLIC_SITE_URL` out. Shareable links are built from the
+   domain the request actually arrived on, so they follow the site wherever it
+   lives. Set it only to force one canonical domain when the site answers on
+   several — and if you do set it, note that `NEXT_PUBLIC_` values are baked
+   in at build time, so changing it needs a fresh deploy, not just a restart.
 
 Vercel's free tier has no cold starts, which is the specific problem that made
 the old Render site feel broken when a link was opened from WhatsApp.
