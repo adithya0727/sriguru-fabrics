@@ -29,8 +29,12 @@ create table if not exists categories (
   created_at  timestamptz not null default now()
 );
 
+-- Fancy is deliberately last: it is the "none of the above" bucket, and the
+-- photo tagger is told to reach for it only when nothing else fits. Leave
+-- gaps in sort_order so a new type can be slotted in without renumbering.
 insert into categories (name, sort_order) values
-  ('Gadwal', 10), ('Ilkal', 20), ('Soft Silk', 30), ('Fancy', 40)
+  ('Gadwal', 10), ('Ilkal', 20), ('Paithani', 25), ('Soft Silk', 30),
+  ('Cotton', 34), ('Chiffon', 36), ('Fancy', 40)
 on conflict (name) do nothing;
 
 -- -----------------------------------------------------------------------------

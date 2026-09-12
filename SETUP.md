@@ -14,14 +14,20 @@ One-time steps to get this running. Budget about 30 minutes.
 
 ## 2. Create the tables
 
-In the Supabase dashboard, open **SQL Editor** and run these two files, in
-order:
+In the Supabase dashboard, open **SQL Editor** and run these files, in order:
 
 1. `supabase/schema.sql` — tables, the one-tap sale function, reporting views,
    and row-level security
 2. `supabase/storage.sql` — the photo bucket and its access rules
+3. `supabase/002-family-allowlist.sql` — restricts access to an explicit list
+   of people, so registering an account grants nothing on its own
+4. `supabase/003-more-categories.sql` — adds Paithani, Cotton and Chiffon to
+   the saree types
 
-Paste the whole file, press Run, confirm it says success, then do the second.
+Paste a whole file, press Run, confirm it says success, then move to the next.
+
+On an existing database you only need the numbered files you haven't run yet;
+each one is safe to re-run if you're unsure.
 
 ## 3. Create logins for the family
 
