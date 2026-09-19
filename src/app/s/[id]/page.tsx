@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicSaree, getSimilarSarees } from '@/lib/queries';
 import { getSiteUrl } from '@/lib/site-url';
+import SareeGallery from '@/components/SareeGallery';
 
 // Rendered fresh on every request. This is what makes an old WhatsApp link
 // tell the truth: a saree sold three weeks after the message was sent shows as
@@ -91,30 +92,7 @@ export default async function SareePage({ params }: Props) {
       </header>
 
       <main className="max-w-lg mx-auto px-5 pt-4">
-        <div className="frame aspect-[3/4] rise">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={saree.photos[0] ?? ''}
-            alt={saree.name}
-            className={`w-full h-full object-cover ${sold ? 'grayscale-[0.7] opacity-70' : ''}`}
-          />
-          {sold && (
-            <div className="absolute top-4 left-4 bg-ink/90 text-white text-xs font-medium tracking-wide uppercase px-3 py-1.5 rounded-full backdrop-blur-sm">
-              Sold
-            </div>
-          )}
-        </div>
-
-        {saree.photos.length > 1 && (
-          <div className="flex gap-2.5 mt-2.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {saree.photos.slice(1).map((url) => (
-              <div key={url} className="frame w-24 h-32 shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
-        )}
+        <SareeGallery photos={saree.photos} name={saree.name} sold={sold} />
 
         <div className="mt-7 rise" style={{ animationDelay: '90ms' }}>
           <p className="eyebrow">{saree.category}</p>
