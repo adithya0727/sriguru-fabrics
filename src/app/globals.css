@@ -251,6 +251,84 @@ textarea.field {
   pointer-events: none;
 }
 
+/* ==========================================================================
+   Dual-thumb price range
+
+   Two native range inputs stacked on one track, because no browser ships a
+   two-handle control. The track and the filled span are drawn underneath;
+   the inputs are transparent and ONLY their thumbs accept touches — without
+   that, whichever input sits on top swallows every tap meant for the other.
+
+   Thumbs are 26px because they are dragged with a thumb, at a rack, one
+   handed. The visual dot can look smaller than the target; the target cannot
+   be smaller than the finger.
+   ========================================================================== */
+
+.range-dual {
+  position: relative;
+  height: 40px;
+}
+
+.range-dual__track,
+.range-dual__fill {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.range-dual__track {
+  left: 0;
+  right: 0;
+  background: var(--color-line-strong);
+}
+.range-dual__fill {
+  background: var(--color-maroon-600);
+}
+
+.range-dual input[type='range'] {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 26px;
+  margin: 0;
+  transform: translateY(-50%);
+  background: transparent;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.range-dual input[type='range']:focus {
+  outline: none;
+}
+.range-dual input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-maroon-700);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
+  cursor: pointer;
+}
+.range-dual input[type='range']::-moz-range-thumb {
+  pointer-events: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-maroon-700);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
+  cursor: pointer;
+}
+.range-dual input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-maroon-600);
+  outline-offset: 2px;
+}
+
 /* A field the tagger was unsure about. */
 .field-flagged {
   border-color: var(--color-gold-300);

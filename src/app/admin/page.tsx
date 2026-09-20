@@ -29,12 +29,6 @@ export default async function StockPage() {
     cost_price: s.cost_price != null ? Number(s.cost_price) : null,
   }));
 
-  const pieces = sarees.reduce((n, s) => n + s.quantity_available, 0);
-  const stockValue = sarees.reduce(
-    (sum, s) => sum + s.price * s.quantity_available,
-    0,
-  );
-
   return (
     <div className="max-w-lg mx-auto">
       <header className="px-5 pt-8 pb-5">
@@ -42,27 +36,7 @@ export default async function StockPage() {
         <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight">
           On the rack
         </h1>
-        <div className="flex gap-6 mt-4">
-          <div>
-            <p className="font-display text-xl text-ink tabular-nums">
-              {sarees.length}
-            </p>
-            <p className="text-xs text-ink-faint">
-              {sarees.length === 1 ? 'design' : 'designs'}
-            </p>
-          </div>
-          <div>
-            <p className="font-display text-xl text-ink tabular-nums">{pieces}</p>
-            <p className="text-xs text-ink-faint">pieces</p>
-          </div>
-          <div>
-            <p className="font-display text-xl text-ink tabular-nums">
-              ₹{stockValue.toLocaleString('en-IN')}
-            </p>
-            <p className="text-xs text-ink-faint">at asking price</p>
-          </div>
-        </div>
-        <div className="rule-fade mt-5" />
+        <div className="rule-fade mt-4" />
       </header>
 
       <StockList sarees={sarees} siteUrl={await getSiteUrl()} />

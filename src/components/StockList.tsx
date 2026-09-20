@@ -2,9 +2,24 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Share2, Search, ChevronRight, Layers } from 'lucide-react';
+import {
+  Share2,
+  Search,
+  ChevronRight,
+  Layers,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import SoldSheet from './SoldSheet';
 import SendByTypeSheet from './SendByTypeSheet';
+
+type Sort = 'newest' | 'price-asc' | 'price-desc';
+
+const SORTS: { value: Sort; label: string }[] = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'price-asc', label: 'Price: low to high' },
+  { value: 'price-desc', label: 'Price: high to low' },
+];
 
 type Row = {
   id: string;
@@ -29,6 +44,14 @@ export default function StockList({
   const [selling, setSelling] = useState<Row | null>(null);
   const [sendingType, setSendingType] = useState(false);
   const [query, setQuery] = useState('');
+  const [type, setType] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>('newest');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // null means "the whole range", so the slider needs no resetting when a sale
+  // changes what is on the rack. Holding two numbers instead would leave them
+  // pointing at prices that are no longer stocked.
+  const [range, setRange] = useState<[number, number] | null>(null);
 
   // The server's idea of the site URL comes from configuration, which can be
   // stale or missing on a deploy. The browser is standing on the real domain,
@@ -37,20 +60,58 @@ export default function StockList({
   const [origin, setOrigin] = useState(siteUrl);
   useEffect(() => setOrigin(window.location.origin), []);
 
+  // Only types actually on the rack. A filter that can only ever return
+  // nothing is worse than no filter.
+  const types = useMemo(
+    () => [...new Set(sarees.map((s) => s.category))].sort(),
+    [sarees],
+  );
+
+  // Rounded outwards to hundreds so the slider lands on prices a person would
+  // say out loud, rather than on 1,847.
+  const bounds = useMemo(() => {
+    if (sarees.length === 0) return { low: 0, high: 1000 };
+    const prices = sarees.map((s) => s.price);
+    const low = Math.floor(Math.min(...prices) / 100) * 100;
+    const high = Math.ceil(Math.max(...prices) / 100) * 100;
+    return { low, high: high > low ? high : low + 100 };
+  }, [sarees]);
+
+  const [low, high] = range ?? [bounds.low, bounds.high];
+  const priceNarrowed = low > bounds.low || high < bounds.high;
+  const activeFilters =
+    (type ? 1 : 0) + (priceNarrowed ? 1 : 0) + (sort !== 'newest' ? 1 : 0);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return sarees;
-    // The bill's wording is searched alongside the shop's own name, because
-    // the two rarely match: a customer asks about what the supplier called it
-    // and the register calls it something else. Either set of words finds it.
-    return sarees.filter(
-      (s) =>
+
+    const matched = sarees.filter((s) => {
+      if (type && s.category !== type) return false;
+      if (s.price < low || s.price > high) return false;
+      if (!q) return true;
+      // The bill's wording is searched alongside the shop's own name, because
+      // the two rarely match: a customer asks about what the supplier called
+      // it and the register calls it something else. Either set finds it.
+      return (
         s.name.toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q) ||
         s.id.toLowerCase().includes(q) ||
-        (s.bill_item_name ?? '').toLowerCase().includes(q),
-    );
-  }, [sarees, query]);
+        (s.bill_item_name ?? '').toLowerCase().includes(q)
+      );
+    });
+
+    // Newest is the order the server already sent, so leave it untouched.
+    if (sort === 'price-asc') return [...matched].sort((a, b) => a.price - b.price);
+    if (sort === 'price-desc') return [...matched].sort((a, b) => b.price - a.price);
+    return matched;
+  }, [sarees, query, type, low, high, sort]);
+
+  function clearAll() {
+    setQuery('');
+    setType(null);
+    setRange(null);
+    setSort('newest');
+  }
 
   if (sarees.length === 0) {
     return (
@@ -66,39 +127,162 @@ export default function StockList({
 
   return (
     <>
-      <div className="px-5 pb-3">
-        <button
-          onClick={() => setSendingType(true)}
-          className="btn btn-secondary w-full"
-        >
-          <Layers size={16} />
-          Send a whole type
-        </button>
+      {/* Search and type are always visible — they answer "where is that one"
+          and "show me the Gadwals", which is most of what gets asked at the
+          rack. Price and order sit behind one tap, so the top of the screen
+          stays a list of sarees rather than a control panel. */}
+      <div className="px-5 pb-3 space-y-2.5">
+        <div className="relative">
+          <Search
+            size={17}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, type, or the bill"
+            className="field field-icon"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              aria-label="Clear the search"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2.5 text-ink-faint"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        {types.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto -mx-5 px-5 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <button
+              onClick={() => setType(null)}
+              className={`chip ${type === null ? 'chip-active' : ''}`}
+            >
+              All
+            </button>
+            {types.map((t) => (
+              <button
+                key={t}
+                onClick={() => setType(type === t ? null : t)}
+                className={`chip ${type === t ? 'chip-active' : ''}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className={`chip ${showFilters || activeFilters > 0 ? 'chip-active' : ''}`}
+          >
+            <SlidersHorizontal size={14} />
+            Price &amp; order
+            {activeFilters > 0 && ` · ${activeFilters}`}
+          </button>
+
+          <p className="text-xs text-ink-faint tabular-nums shrink-0">
+            {filtered.length === sarees.length
+              ? `${sarees.length} ${sarees.length === 1 ? 'saree' : 'sarees'}`
+              : `${filtered.length} of ${sarees.length}`}
+          </p>
+        </div>
+
+        {showFilters && (
+          <div className="card p-4 space-y-4 rise">
+            <div>
+              <div className="flex items-baseline justify-between gap-3 mb-1">
+                <span className="text-sm font-medium text-ink">Price</span>
+                <span className="text-sm text-ink-soft tabular-nums">
+                  ₹{low.toLocaleString('en-IN')} – ₹{high.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              <div className="range-dual">
+                <div className="range-dual__track" />
+                <div
+                  className="range-dual__fill"
+                  style={{
+                    left: `${percent(low, bounds)}%`,
+                    right: `${100 - percent(high, bounds)}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  aria-label="Lowest price"
+                  min={bounds.low}
+                  max={bounds.high}
+                  step={100}
+                  value={low}
+                  onChange={(e) => setRange(clamp(Number(e.target.value), high, bounds, 'low'))}
+                />
+                <input
+                  type="range"
+                  aria-label="Highest price"
+                  min={bounds.low}
+                  max={bounds.high}
+                  step={100}
+                  value={high}
+                  onChange={(e) => setRange(clamp(Number(e.target.value), low, bounds, 'high'))}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="sort"
+                className="block text-sm font-medium text-ink mb-1.5"
+              >
+                Order
+              </label>
+              <select
+                id="sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as Sort)}
+                className="field"
+              >
+                {SORTS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={() => setSendingType(true)}
+              className="btn btn-secondary w-full text-sm"
+            >
+              <Layers size={15} />
+              Send a whole type
+            </button>
+
+            {(activeFilters > 0 || query) && (
+              <button
+                onClick={clearAll}
+                className="btn btn-ghost w-full !min-h-0 py-2 text-sm"
+              >
+                Clear everything
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Search appears once the rack is big enough to need it. */}
-      {sarees.length > 8 && (
-        <div className="px-5 pb-3">
-          <div className="relative">
-            <Search
-              size={17}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name, type, or the bill"
-              className="field field-icon"
-            />
-          </div>
-        </div>
-      )}
-
       {filtered.length === 0 ? (
-        <p className="text-center text-ink-soft py-16 text-sm">
-          Nothing matches “{query}”.
-        </p>
+        <div className="text-center py-16 px-5">
+          <p className="text-ink-soft text-sm">
+            {query ? `Nothing matches “${query}”` : 'Nothing matches these filters'}
+            {type && ` in ${type}`}.
+          </p>
+          <button onClick={clearAll} className="btn btn-secondary mt-5 text-sm">
+            Clear everything
+          </button>
+        </div>
       ) : (
         <ul className="px-5 space-y-2.5">
           {filtered.map((s) => {
@@ -198,4 +382,36 @@ export default function StockList({
       )}
     </>
   );
+}
+
+/** Where a price sits along the slider, as a percentage of its span. */
+function percent(value: number, bounds: { low: number; high: number }): number {
+  const span = bounds.high - bounds.low;
+  if (span <= 0) return 0;
+  return ((value - bounds.low) / span) * 100;
+}
+
+const STEP = 100;
+
+/**
+ * Keep the two thumbs at least one step apart.
+ *
+ * Sitting on the same value, they overlap exactly and only whichever input is
+ * painted on top can still be grabbed — the other is unreachable, and the
+ * range looks stuck. A step of daylight between them costs nothing and keeps
+ * both draggable.
+ */
+function clamp(
+  value: number,
+  other: number,
+  bounds: { low: number; high: number },
+  which: 'low' | 'high',
+): [number, number] {
+  const roomy = bounds.high - bounds.low > STEP;
+  if (which === 'low') {
+    const ceiling = roomy ? other - STEP : other;
+    return [Math.min(value, ceiling), other];
+  }
+  const floor = roomy ? other + STEP : other;
+  return [other, Math.max(value, floor)];
 }
