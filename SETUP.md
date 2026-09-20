@@ -38,8 +38,9 @@ each one is safe to re-run if you're unsure.
 **Authentication → Users → Add user** for each person who will add stock.
 Use "Auto Confirm User" so there's no email verification step.
 
-Suggested: one account each rather than a shared login, so the stock register
-shows who did what if something looks wrong later.
+One shared login is fine. Separate accounts per person would be tidier, but
+nothing in the app records who added or sold what, so today they buy you only
+separate passwords — not an audit trail.
 
 Then turn **off** public signups. Without this, anyone who finds the site can
 create an account, see every cost price and edit your stock.

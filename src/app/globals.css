@@ -98,311 +98,362 @@ html {
 }
 
 /* ==========================================================================
-   Type
+   Component classes — INSIDE @layer components on purpose.
+
+   Unlayered CSS beats every layered rule regardless of source order, and
+   Tailwind puts its utilities in @layer utilities. So while these lived
+   outside a layer, any utility touching a property they set silently did
+   nothing: `pl-8` on a .field, `text-lg` on a price input, `h-auto py-5
+   flex-col gap-2` on the camera button, `pr-9` beside a % sign. Three
+   separate visual bugs shipped from that before the cause was addressed.
+
+   Inside the layer, a utility on top of a component class wins, which is what
+   anyone writing the markup expects. Keep new component classes in here.
    ========================================================================== */
 
-.font-display {
-  font-family: var(--font-display);
-  font-optical-sizing: auto;
-  letter-spacing: -0.015em;
-}
+@layer components {
+  /* ==========================================================================
+     Type
+     ========================================================================== */
 
-.eyebrow {
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--color-maroon-600);
-}
-
-/* A hairline rule that fades out — reads like the selvedge edge of a border
-   rather than a hard divider. */
-.rule-fade {
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--color-line-strong) 18%,
-    var(--color-line-strong) 82%,
-    transparent
-  );
-}
-
-/* ==========================================================================
-   Components
-   ========================================================================== */
-
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-}
-
-/* Buttons. The lift on press is deliberately absent on the primary action —
-   a confirm button that moves under the thumb feels unreliable. */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 48px;
-  padding: 0 1.25rem;
-  border-radius: 10px;
-  font-weight: 500;
-  font-size: 0.9375rem;
-  transition: background-color 160ms ease, border-color 160ms ease,
-    color 160ms ease, box-shadow 160ms ease;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: var(--color-maroon-700);
-  color: #fff;
-  box-shadow: 0 1px 2px rgb(92 31 43 / 0.18);
-}
-.btn-primary:hover:not(:disabled) {
-  background: var(--color-maroon-800);
-}
-.btn-primary:active:not(:disabled) {
-  background: var(--color-maroon-900);
-}
-.btn-primary:disabled {
-  background: var(--color-maroon-200);
-  color: #fff;
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: var(--color-surface);
-  color: var(--color-maroon-700);
-  border: 1px solid var(--color-line-strong);
-}
-.btn-secondary:hover:not(:disabled) {
-  border-color: var(--color-maroon-400);
-  background: var(--color-maroon-50);
-}
-
-.btn-ghost {
-  background: transparent;
-  color: var(--color-ink-soft);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--color-canvas-warm);
-  color: var(--color-ink);
-}
-
-.btn-whatsapp {
-  background: #1f8a4c;
-  color: #fff;
-}
-.btn-whatsapp:hover:not(:disabled) {
-  background: #196f3d;
-}
-
-/* Inputs. 16px minimum on mobile, or iOS zooms the whole page on focus. */
-.field {
-  width: 100%;
-  min-height: 48px;
-  padding: 0 0.875rem;
-  font-size: 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line-strong);
-  border-radius: 10px;
-  color: var(--color-ink);
-  transition: border-color 140ms ease, box-shadow 140ms ease;
-}
-.field::placeholder {
-  color: var(--color-ink-faint);
-}
-.field:focus {
-  outline: none;
-  border-color: var(--color-maroon-400);
-  box-shadow: 0 0 0 3px var(--color-maroon-100);
-}
-textarea.field {
-  min-height: 0;
-  padding: 0.75rem 0.875rem;
-  line-height: 1.6;
-  resize: vertical;
-}
-
-/* Inputs with something sitting inside them — a ₹ sign, a search icon — need
-   their text to start clear of it, or the two overlap as soon as you type.
-
-   The padding lives here rather than on a `pl-*` utility: .field is unlayered
-   and Tailwind's utilities are in @layer utilities, so unlayered wins and a
-   padding utility on a .field silently does nothing. */
-.field-money {
-  padding-left: 2rem;
-}
-.field-icon {
-  padding-left: 2.625rem;
-}
-
-/* The thing sitting inside. Not interactive — tapping the ₹ should put the
-   cursor in the field rather than swallow the tap. */
-.field-prefix {
-  position: absolute;
-  left: 0.875rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-ink-faint);
-  pointer-events: none;
-}
-
-/* ==========================================================================
-   Dual-thumb price range
-
-   Two native range inputs stacked on one track, because no browser ships a
-   two-handle control. The track and the filled span are drawn underneath;
-   the inputs are transparent and ONLY their thumbs accept touches — without
-   that, whichever input sits on top swallows every tap meant for the other.
-
-   Thumbs are 26px because they are dragged with a thumb, at a rack, one
-   handed. The visual dot can look smaller than the target; the target cannot
-   be smaller than the finger.
-   ========================================================================== */
-
-.range-dual {
-  position: relative;
-  height: 40px;
-}
-
-.range-dual__track,
-.range-dual__fill {
-  position: absolute;
-  top: 50%;
-  height: 4px;
-  margin-top: -2px;
-  border-radius: 999px;
-  pointer-events: none;
-}
-.range-dual__track {
-  left: 0;
-  right: 0;
-  background: var(--color-line-strong);
-}
-.range-dual__fill {
-  background: var(--color-maroon-600);
-}
-
-.range-dual input[type='range'] {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 26px;
-  margin: 0;
-  transform: translateY(-50%);
-  background: transparent;
-  pointer-events: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-.range-dual input[type='range']:focus {
-  outline: none;
-}
-.range-dual input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  pointer-events: auto;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--color-maroon-700);
-  border: 3px solid var(--color-surface);
-  box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
-  cursor: pointer;
-}
-.range-dual input[type='range']::-moz-range-thumb {
-  pointer-events: auto;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--color-maroon-700);
-  border: 3px solid var(--color-surface);
-  box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
-  cursor: pointer;
-}
-.range-dual input[type='range']:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid var(--color-maroon-600);
-  outline-offset: 2px;
-}
-
-/* A field the tagger was unsure about. */
-.field-flagged {
-  border-color: var(--color-gold-300);
-  background: #fffdf6;
-}
-.field-flagged:focus {
-  border-color: var(--color-gold-500);
-  box-shadow: 0 0 0 3px var(--color-gold-100);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.4375rem 0.875rem;
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  border: 1px solid var(--color-line-strong);
-  background: var(--color-surface);
-  color: var(--color-ink-soft);
-  transition: all 160ms ease;
-  white-space: nowrap;
-}
-.chip:hover {
-  border-color: var(--color-maroon-400);
-  color: var(--color-maroon-700);
-}
-.chip-active {
-  background: var(--color-maroon-700);
-  border-color: var(--color-maroon-700);
-  color: #fff;
-}
-.chip-active:hover {
-  color: #fff;
-}
-
-/* Product cards. The image lifts, the card doesn't — the photograph is the
-   thing being offered, so it's what should respond. */
-.product-card img {
-  transition: transform 480ms cubic-bezier(0.2, 0.6, 0.2, 1);
-}
-.product-card:hover img {
-  transform: scale(1.035);
-}
-
-.frame {
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background: var(--color-canvas-warm);
-}
-/* An inner hairline so a pale saree doesn't bleed into a pale page. */
-.frame::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 1px rgb(43 27 31 / 0.07);
-  pointer-events: none;
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
   }
-  to {
-    opacity: 1;
-    transform: none;
+
+  .eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-maroon-600);
   }
-}
-.rise {
-  animation: rise 520ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
+
+  /* A hairline rule that fades out — reads like the selvedge edge of a border
+     rather than a hard divider. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-line-strong) 18%,
+      var(--color-line-strong) 82%,
+      transparent
+    );
+  }
+
+  /* ==========================================================================
+     Components
+     ========================================================================== */
+
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  /* Buttons. The lift on press is deliberately absent on the primary action —
+     a confirm button that moves under the thumb feels unreliable. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0 1.25rem;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: background-color 160ms ease, border-color 160ms ease,
+      color 160ms ease, box-shadow 160ms ease;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--color-maroon-700);
+    color: #fff;
+    box-shadow: 0 1px 2px rgb(92 31 43 / 0.18);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-maroon-800);
+  }
+  .btn-primary:active:not(:disabled) {
+    background: var(--color-maroon-900);
+  }
+  .btn-primary:disabled {
+    background: var(--color-maroon-200);
+    color: #fff;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-maroon-700);
+    border: 1px solid var(--color-line-strong);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--color-maroon-400);
+    background: var(--color-maroon-50);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-ink-soft);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-canvas-warm);
+    color: var(--color-ink);
+  }
+
+  .btn-whatsapp {
+    background: #1f8a4c;
+    color: #fff;
+  }
+  .btn-whatsapp:hover:not(:disabled) {
+    background: #196f3d;
+  }
+
+  /* Inputs. 16px minimum on mobile, or iOS zooms the whole page on focus. */
+  .field {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 0.875rem;
+    font-size: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 10px;
+    color: var(--color-ink);
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .field::placeholder {
+    color: var(--color-ink-faint);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-maroon-400);
+    box-shadow: 0 0 0 3px var(--color-maroon-100);
+  }
+  textarea.field {
+    min-height: 0;
+    padding: 0.75rem 0.875rem;
+    line-height: 1.6;
+    resize: vertical;
+  }
+
+  /* Inputs with something sitting inside them — a ₹ sign, a search icon — need
+     their text to start clear of it, or the two overlap as soon as you type.
+
+     The padding lives here rather than on a `pl-*` utility: .field is unlayered
+     and Tailwind's utilities are in @layer utilities, so unlayered wins and a
+     padding utility on a .field silently does nothing. */
+  .field-money {
+    padding-left: 2rem;
+  }
+  .field-icon {
+    padding-left: 2.625rem;
+  }
+
+  /* The thing sitting inside. Not interactive — tapping the ₹ should put the
+     cursor in the field rather than swallow the tap. */
+  .field-prefix {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-ink-faint);
+    pointer-events: none;
+  }
+
+  /* ==========================================================================
+     Skeletons
+
+     Every route is rendered per request, so each tab tap waits on the network.
+     A shape where the content will be reads as "coming", where an empty screen
+     reads as "broken" — the wait is the same either way.
+     ========================================================================== */
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-canvas-warm) 25%,
+      #f0e7e0 37%,
+      var(--color-canvas-warm) 63%
+    );
+    background-size: 400% 100%;
+    animation: skeleton-sweep 1.4s ease-in-out infinite;
+    border-radius: 8px;
+  }
+
+  @keyframes skeleton-sweep {
+    from {
+      background-position: 100% 50%;
+    }
+    to {
+      background-position: 0 50%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+    }
+  }
+
+  /* ==========================================================================
+     Dual-thumb price range
+
+     Two native range inputs stacked on one track, because no browser ships a
+     two-handle control. The track and the filled span are drawn underneath;
+     the inputs are transparent and ONLY their thumbs accept touches — without
+     that, whichever input sits on top swallows every tap meant for the other.
+
+     Thumbs are 26px because they are dragged with a thumb, at a rack, one
+     handed. The visual dot can look smaller than the target; the target cannot
+     be smaller than the finger.
+     ========================================================================== */
+
+  .range-dual {
+    position: relative;
+    height: 40px;
+  }
+
+  .range-dual__track,
+  .range-dual__fill {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .range-dual__track {
+    left: 0;
+    right: 0;
+    background: var(--color-line-strong);
+  }
+  .range-dual__fill {
+    background: var(--color-maroon-600);
+  }
+
+  .range-dual input[type='range'] {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 26px;
+    margin: 0;
+    transform: translateY(-50%);
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .range-dual input[type='range']:focus {
+    outline: none;
+  }
+  .range-dual input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--color-maroon-700);
+    border: 3px solid var(--color-surface);
+    box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
+    cursor: pointer;
+  }
+  .range-dual input[type='range']::-moz-range-thumb {
+    pointer-events: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-maroon-700);
+    border: 3px solid var(--color-surface);
+    box-shadow: 0 1px 4px rgb(43 27 31 / 0.3);
+    cursor: pointer;
+  }
+  .range-dual input[type='range']:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-maroon-600);
+    outline-offset: 2px;
+  }
+
+  /* A field the tagger was unsure about. */
+  .field-flagged {
+    border-color: var(--color-gold-300);
+    background: #fffdf6;
+  }
+  .field-flagged:focus {
+    border-color: var(--color-gold-500);
+    box-shadow: 0 0 0 3px var(--color-gold-100);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 0.875rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-surface);
+    color: var(--color-ink-soft);
+    transition: all 160ms ease;
+    white-space: nowrap;
+  }
+  .chip:hover {
+    border-color: var(--color-maroon-400);
+    color: var(--color-maroon-700);
+  }
+  .chip-active {
+    background: var(--color-maroon-700);
+    border-color: var(--color-maroon-700);
+    color: #fff;
+  }
+  .chip-active:hover {
+    color: #fff;
+  }
+
+  /* Product cards. The image lifts, the card doesn't — the photograph is the
+     thing being offered, so it's what should respond. */
+  .product-card img {
+    transition: transform 480ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  .product-card:hover img {
+    transform: scale(1.035);
+  }
+
+  .frame {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--color-canvas-warm);
+  }
+  /* An inner hairline so a pale saree doesn't bleed into a pale page. */
+  .frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 1px rgb(43 27 31 / 0.07);
+    pointer-events: none;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .rise {
+    animation: rise 520ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
 import './globals.css';
 
@@ -29,6 +29,17 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     type: 'website',
   },
+  appleWebApp: {
+    capable: true,
+    title: 'Sri Guru',
+    statusBarStyle: 'default',
+  },
+};
+
+/** Paints the phone's address bar in the shop's maroon, and lets iOS run it
+ *  fullscreen when added to the home screen. */
+export const viewport: Viewport = {
+  themeColor: '#5c1f2b',
 };
 
 export default function RootLayout({

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import SellSheet from './SellSheet';
 import SendByTypeSheet from './SendByTypeSheet';
+import SareePhoto from './SareePhoto';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
 
@@ -295,10 +296,11 @@ export default function StockList({
               <li key={s.id} className="card overflow-hidden">
                 <div className="flex gap-3.5 p-3">
                   <Link href={`/admin/s/${s.id}`} className="frame w-16 h-20 shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photos[0] ?? ''}
+                    <SareePhoto
+                      url={s.photos[0]}
                       alt=""
+                      widths={[128, 256]}
+                      sizes="64px"
                       className="w-full h-full object-cover"
                     />
                   </Link>

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getPublicSaree, getSimilarSarees } from '@/lib/queries';
 import { getSiteUrl } from '@/lib/site-url';
 import SareeGallery from '@/components/SareeGallery';
+import SareePhoto from '@/components/SareePhoto';
 import { SHOP } from '@/lib/shop';
 
 // Rendered fresh on every request. This is what makes an old WhatsApp link
@@ -146,11 +147,11 @@ export default async function SareePage({ params }: Props) {
                       className="product-card group"
                     >
                       <div className="frame aspect-[3/4]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={s.photos[0] ?? ''}
+                        <SareePhoto
+                          url={s.photos[0]}
                           alt={s.name}
-                          loading="lazy"
+                          widths={[256, 384]}
+                          sizes="50vw"
                           className="w-full h-full object-cover"
                         />
                       </div>

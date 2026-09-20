@@ -5,6 +5,7 @@ import { listCategories, listPublicSarees } from '@/lib/queries';
 import { categoryFromSlug } from '@/lib/categories';
 import { getSiteUrl } from '@/lib/site-url';
 import { SHOP } from '@/lib/shop';
+import SareePhoto from '@/components/SareePhoto';
 import type { PublicSaree } from '@/lib/types';
 
 // Rendered fresh every time, like the single-saree page. This is what makes
@@ -107,11 +108,12 @@ export default async function TypePage({ params }: Props) {
                   style={{ animationDelay: `${Math.min(i * 45, 400)}ms` }}
                 >
                   <div className="frame aspect-[3/4]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photos[0] ?? ''}
+                    <SareePhoto
+                      url={s.photos[0]}
                       alt={s.name}
-                      loading={i < 6 ? 'eager' : 'lazy'}
+                      widths={[256, 384, 640]}
+                      sizes="(min-width: 768px) 33vw, 50vw"
+                      eager={i < 4}
                       className="w-full h-full object-cover"
                     />
                   </div>

@@ -1,10 +1,62 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { listPublicSarees, listCategories } from '@/lib/queries';
 import { SHOP } from '@/lib/shop';
+import SareePhoto from '@/components/SareePhoto';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
 type Props = { searchParams: Promise<{ category?: string }> };
+
+const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;
+
+/**
+ * The card WhatsApp shows for the shop itself.
+ *
+ * This is the most-shared link there is — it goes on a visiting card, a status,
+ * a reply to "where can I see what you have?" — and until now it unfurled with
+ * no photograph at all, because the root layout sets no openGraph image and
+ * this page set no metadata of its own.
+ */
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { category } = await searchParams;
+  const [sarees, siteUrl] = await Promise.all([
+    listPublicSarees({ category }),
+    getSiteUrl(),
+  ]);
+
+  const prices = sarees.map((s) => Number(s.price));
+  const low = prices.length > 0 ? Math.min(...prices) : 0;
+  const high = prices.length > 0 ? Math.max(...prices) : 0;
+  const count = `${sarees.length} ${sarees.length === 1 ? 'saree' : 'sarees'}`;
+
+  const title =
+    sarees.length === 0
+      ? SHOP.name
+      : `${category ?? SHOP.name} — ${count}, ` +
+        (low === high ? rupees(low) : `${rupees(low)} to ${rupees(high)}`);
+
+  const path = category ? `/?category=${encodeURIComponent(category)}` : '/';
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title,
+    // Null on purpose, as on every other shareable page: anything here becomes
+    // a second line under the headline in WhatsApp.
+    description: null,
+    alternates: { canonical: path },
+    openGraph: {
+      title,
+      url: `${siteUrl}${path}`,
+      // The newest saree, so the card refreshes itself as stock arrives.
+      images: sarees[0]?.photos[0]
+        ? [{ url: sarees[0].photos[0], width: 1200, height: 1600, alt: SHOP.name }]
+        : [],
+      type: 'website',
+    },
+  };
+}
 
 export default async function CatalogPage({ searchParams }: Props) {
   const { category } = await searchParams;
@@ -76,11 +128,12 @@ export default async function CatalogPage({ searchParams }: Props) {
                   style={{ animationDelay: `${Math.min(i * 45, 400)}ms` }}
                 >
                   <div className="frame aspect-[3/4]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={s.photos[0] ?? ''}
+                    <SareePhoto
+                      url={s.photos[0]}
                       alt={s.name}
-                      loading={i < 6 ? 'eager' : 'lazy'}
+                      widths={[256, 384, 640]}
+                      sizes="(min-width: 768px) 33vw, 50vw"
+                      eager={i < 4}
                       className="w-full h-full object-cover"
                     />
                   </div>
