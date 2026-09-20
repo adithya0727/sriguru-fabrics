@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Plus, Package, BookOpen, ReceiptText } from 'lucide-react';
+import { Plus, Package, NotebookPen, ReceiptText } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -21,7 +21,7 @@ export default function AdminLayout({
             icon={<ReceiptText size={19} />}
             label="Receipts"
           />
-          <NavItem href="/admin/accounts" icon={<BookOpen size={19} />} label="Accounts" />
+          <NavItem href="/admin/sales" icon={<NotebookPen size={19} />} label="Sales" />
         </div>
       </nav>
     </div>

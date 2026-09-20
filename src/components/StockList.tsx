@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react';
-import SoldSheet from './SoldSheet';
+import SellSheet from './SellSheet';
 import SendByTypeSheet from './SendByTypeSheet';
 
 type Sort = 'newest' | 'price-asc' | 'price-desc';
@@ -352,7 +352,7 @@ export default function StockList({
                     onClick={() => setSelling(s)}
                     className="py-3 text-sm font-medium text-maroon-700 hover:bg-maroon-50 transition-colors border-r border-line"
                   >
-                    Mark sold
+                    Sell
                   </button>
                   {/* The link and nothing else. WhatsApp expands it into a
                       card with the photo, name, type and price, so sending
@@ -373,7 +373,7 @@ export default function StockList({
         </ul>
       )}
 
-      {selling && <SoldSheet saree={selling} onClose={() => setSelling(null)} />}
+      {selling && <SellSheet saree={selling} onClose={() => setSelling(null)} />}
 
       {sendingType && (
         <SendByTypeSheet

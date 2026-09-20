@@ -55,11 +55,27 @@ export type Sale = {
   saree_id: string;
   customer_id: string | null;
   quantity: number;
+  /** The asking price at the time of sale. */
   unit_price: number;
+  /** What was actually charged, after any discount. */
+  final_unit_price: number | null;
+  discount_percent: number;
+  /** The receipt written for the customer. Often filled in later. */
+  receipt_number: string | null;
+  customer_name: string | null;
   unit_cost: number | null;
   channel: SaleChannel;
   notes: string | null;
   sold_at: string;
+};
+
+/** A row of the Sales Book: a sale, with the saree details joined on.
+ *  Profit is derived by the database, never stored, so it cannot drift. */
+export type SaleRow = Sale & {
+  margin: number;
+  saree_name: string;
+  category: string;
+  supplier: string | null;
 };
 
 /** Everything the photo tagger tries to work out from the images. */
