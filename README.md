@@ -17,7 +17,9 @@ Three surfaces, one database:
 |---|---|---|
 | `/admin` | Family, on phones | Add a saree in ~30 seconds, mark sold in one tap |
 | `/s/[id]` | Customers | The link that gets shared. Live, so it never goes stale |
-| `/admin/dashboard` | Family | Profit, dead stock, what's worth buying more of |
+| `/c/[type]` | Customers | A whole saree type in one link, always current |
+| `/admin/accounts` | Family | Profit, dead stock, what's worth buying more of |
+| `/admin/receipts` | Family | Supplier bills, photographed and read into editable tables |
 
 ## Adding a saree
 
@@ -40,6 +42,11 @@ directly — public pages are rendered by the server.
 If you add a public page, use the helpers in `queries.ts`. Don't query Supabase
 from a public client component.
 
+The same rule decides where photos live. Saree photos sit in a **public** bucket
+because WhatsApp's crawler has to fetch them without logging in. Bill photos
+show supplier names and what was paid, so they sit in a **private** bucket and
+are only ever reached through short-lived signed URLs.
+
 ## Running it
 
 See [SETUP.md](SETUP.md). Short version:
@@ -53,7 +60,7 @@ npm run dev
 ## Stack
 
 Next.js 16 (App Router) · Supabase (Postgres, Storage, Auth) · Tailwind 4 ·
-Claude Opus 5 for photo tagging.
+Claude Haiku 4.5 for reading saree photos and supplier bills.
 
 Server-rendered per request, which is what generates the WhatsApp preview cards
 and keeps shared links honest.

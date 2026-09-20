@@ -13,7 +13,18 @@ import {
 } from './vocabulary';
 import type { TaggedAttributes } from './types';
 
-const MODEL = 'claude-opus-5';
+/**
+ * Haiku 4.5 — about a fifth of what Opus 5 cost per saree (~$0.024 to ~$0.005).
+ *
+ * The trade is judgement: it is weaker at the genuinely hard calls, above all
+ * telling pure silk from semi silk in a photograph. That is what low_confidence
+ * is for, and every listing is reviewed by a person before it goes out.
+ *
+ * Haiku 4.5 also rejects two parameters a Claude 5 model accepts — adaptive
+ * thinking (4.6+ only) and `output_config.effort` (errors here). Both were
+ * removed below. Put them back if this ever points at a Claude 5 model again.
+ */
+const MODEL = 'claude-haiku-4-5';
 
 const TagSchema = z.object({
   name: z
@@ -112,11 +123,7 @@ export async function tagSareePhotos(
   const response = await client.messages.parse({
     model: MODEL,
     max_tokens: 2000,
-    thinking: { type: 'adaptive' },
-    output_config: {
-      effort: 'low',
-      format: zodOutputFormat(TagSchema),
-    },
+    output_config: { format: zodOutputFormat(TagSchema) },
     system: [
       {
         type: 'text',
@@ -158,7 +165,7 @@ export async function tagSareePhotos(
     throw new Error('The tagger could not read these photos. Enter details manually.');
   }
 
-  // Opus 5 pricing: $5 / $25 per million tokens.
+  // Haiku 4.5 pricing: $1 / $5 per million tokens.
   const inputTokens =
     response.usage.input_tokens +
     (response.usage.cache_read_input_tokens ?? 0) +
@@ -171,10 +178,10 @@ export async function tagSareePhotos(
       inputTokens,
       outputTokens,
       estimatedCostUsd:
-        (response.usage.input_tokens * 5 +
-          (response.usage.cache_read_input_tokens ?? 0) * 0.5 +
-          (response.usage.cache_creation_input_tokens ?? 0) * 6.25 +
-          outputTokens * 25) /
+        (response.usage.input_tokens * 1 +
+          (response.usage.cache_read_input_tokens ?? 0) * 0.1 +
+          (response.usage.cache_creation_input_tokens ?? 0) * 1.25 +
+          outputTokens * 5) /
         1_000_000,
     },
   };

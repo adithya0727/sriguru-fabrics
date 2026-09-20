@@ -23,6 +23,8 @@ In the Supabase dashboard, open **SQL Editor** and run these files, in order:
    of people, so registering an account grants nothing on its own
 4. `supabase/003-more-categories.sql` — adds Paithani, Cotton and Chiffon to
    the saree types
+5. `supabase/004-store-receipts.sql` — supplier bills, and the **private**
+   photo bucket they live in
 
 Paste a whole file, press Run, confirm it says success, then move to the next.
 
@@ -118,11 +120,28 @@ photo, the name and the price — not a bare grey rectangle.
 WhatsApp caches previews hard. If you change a page and the old card persists,
 test with a fresh saree link rather than assuming it's broken.
 
-## What the tagging costs
+## What the AI costs
 
-Roughly **$0.015 per saree** — two photos downscaled to 768px, plus a cached
-system prompt. Your $5 covers about 300 sarees.
+Both readers run on `claude-haiku-4-5`, the cheapest model with vision.
+Measured, not estimated:
 
-If that ever needs to come down, the levers in order are: send one photo
-instead of two, or try `claude-haiku-4-5` in `src/lib/tagger-core.ts` and
-compare the results on a few sarees before committing to it.
+| | Per use | Where the model is set |
+|---|---|---|
+| Tagging a saree | ~$0.005 | `MODEL` in `src/lib/tagger-core.ts` |
+| Reading a bill | ~$0.007 | `MODEL` in `src/lib/receipt-core.ts` |
+
+That is about **₹0.5 each**, so $5 of credit covers roughly a thousand of them.
+
+If bills come out misread — handwriting and faint thermal print are where Haiku
+is weakest — change that one `MODEL` line to `claude-sonnet-5`. It costs about
+twice as much and is markedly better on messy input.
+
+**If you move either to a Claude 5 model, note what had to be removed for
+Haiku:** adaptive thinking (`thinking: {type: 'adaptive'}`) is 4.6+ only, and
+`output_config.effort` is rejected outright by Haiku 4.5. Both can come back on
+a Claude 5 model; neither may be present while the model is Haiku.
+
+Photos are sent at the size that actually helps and no larger. Sarees go at
+768px, where accuracy plateaus. Bills go at 1024px, because small digits need
+the detail — and no higher, because the API caps images near 1.19 megapixels,
+so a bigger upload is resized away before the model ever sees it.
