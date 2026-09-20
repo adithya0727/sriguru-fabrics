@@ -61,6 +61,7 @@ export default function AddSareeForm({
 }) {
   const router = useRouter();
   const [billId, setBillId] = useState<string>('');
+  const [markup, setMarkup] = useState('');
   const [match, setMatch] = useState<Match | null>(null);
   const [stage, setStage] = useState<Stage>('photos');
   const [previews, setPreviews] = useState<string[]>([]);
@@ -223,6 +224,36 @@ export default function AddSareeForm({
     // Send button is on the row, so there is nothing to confirm on the way.
     router.push('/admin');
     router.refresh();
+  }
+
+  /** Cost plus a percentage, to the nearest rupee. */
+  function sellingPriceFrom(cost: string, percent: string): string {
+    const c = Number(cost);
+    const p = Number(percent);
+    if (!Number.isFinite(c) || c <= 0) return '';
+    if (!Number.isFinite(p) || percent.trim() === '') return '';
+    return String(Math.round(c * (1 + p / 100)));
+  }
+
+  /** Cost changed — carry the price with it only while a percentage is set, so
+   *  a hand-typed price is never overwritten from underneath. */
+  function changeCost(cost: string) {
+    const price = sellingPriceFrom(cost, markup);
+    setDraft({ ...draft, cost_price: cost, price: price || draft.price });
+  }
+
+  function changeMarkup(percent: string) {
+    setMarkup(percent);
+    const price = sellingPriceFrom(draft.cost_price, percent);
+    if (price) setDraft({ ...draft, price });
+  }
+
+  /** Typing a price directly drops the percentage: it described how the price
+   *  was arrived at, and once overridden it no longer does. Leaving "40" on
+   *  screen beside a price that is not cost plus 40% would simply be wrong. */
+  function changePrice(price: string) {
+    setMarkup('');
+    setDraft({ ...draft, price });
   }
 
   // ---------------------------------------------------------------- rendering
@@ -415,37 +446,65 @@ export default function AddSareeForm({
         </div>
       )}
 
-      {/* Money first — it's the only part a person actually has to think about. */}
+      {/* Money first — it's the only part a person actually has to think about.
+          Cost leads, because the selling price is worked out from it. */}
       <section className="card p-5 mt-6">
         <h2 className="eyebrow mb-4">Prices</h2>
 
-        <Field label="Selling price" required>
+        <Field label="What we paid" hint="Only we see this. Used for profit.">
           <div className="relative">
-            <span className="field-prefix">
-              ₹
-            </span>
+            <span className="field-prefix">₹</span>
             <input
               type="number"
               inputMode="numeric"
               autoFocus
-              value={draft.price}
-              onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+              value={draft.cost_price}
+              onChange={(e) => changeCost(e.target.value)}
               className="field field-money text-lg font-medium"
             />
           </div>
         </Field>
 
-        <Field label="What we paid" hint="Only we see this. Used for profit.">
+        <Field
+          label="Add on"
+          hint="The usual amounts are a tap away; any other number can be typed."
+        >
+          <div className="flex gap-2 mb-2.5">
+            {['40', '50', '60'].map((percent) => (
+              <button
+                key={percent}
+                type="button"
+                onClick={() => changeMarkup(markup === percent ? '' : percent)}
+                className={`chip ${markup === percent ? 'chip-active' : ''}`}
+              >
+                {percent}%
+              </button>
+            ))}
+          </div>
           <div className="relative">
-            <span className="field-prefix">
-              ₹
-            </span>
             <input
               type="number"
               inputMode="numeric"
-              value={draft.cost_price}
-              onChange={(e) => setDraft({ ...draft, cost_price: e.target.value })}
-              className="field field-money"
+              value={markup}
+              onChange={(e) => changeMarkup(e.target.value)}
+              placeholder="Percent on top of what we paid"
+              className="field pr-9"
+            />
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none">
+              %
+            </span>
+          </div>
+        </Field>
+
+        <Field label="Selling price" required hint={marginHint(draft)}>
+          <div className="relative">
+            <span className="field-prefix">₹</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={draft.price}
+              onChange={(e) => changePrice(e.target.value)}
+              className="field field-money text-lg font-medium"
             />
           </div>
         </Field>
@@ -572,4 +631,20 @@ function Field({
       {hint && <p className="text-xs text-ink-soft mt-1.5">{hint}</p>}
     </div>
   );
+}
+
+/** What each piece earns, once both prices are in. The profit is shown rather
+ *  than the sum that produced it — that is the number worth a second look. */
+function marginHint(draft: {
+  price: string;
+  cost_price: string;
+}): string | undefined {
+  const price = Number(draft.price);
+  const cost = Number(draft.cost_price);
+  if (!Number.isFinite(price) || !Number.isFinite(cost)) return undefined;
+  if (price <= 0 || cost <= 0) return undefined;
+
+  const margin = price - cost;
+  if (margin <= 0) return 'This is at or below what we paid.';
+  return `₹${margin.toLocaleString('en-IN')} on each piece.`;
 }
