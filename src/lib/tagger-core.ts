@@ -26,7 +26,7 @@ import type { TaggedAttributes } from './types';
  */
 const MODEL = 'claude-haiku-4-5';
 
-const TagSchema = z.object({
+const BASE_SHAPE = {
   name: z
     .string()
     .describe(
@@ -69,7 +69,32 @@ const TagSchema = z.object({
         'Be honest — an unflagged wrong guess is worse than a flagged one. ' +
         'Fabric is frequently uncertain from a photograph; say so when it is.',
     ),
+};
+
+const TagSchema = z.object(BASE_SHAPE);
+
+/** Used when the saree is known to have come from a particular bill, so the
+ *  model can say which line of it this is. */
+const MatchedTagSchema = z.object({
+  ...BASE_SHAPE,
+  matched_item: z
+    .number()
+    .int()
+    .describe(
+      'The number of the bill line this saree is, from the list given. Use -1 ' +
+        'when none of them plausibly describes it — a wrong match copies a ' +
+        'wrong cost price into the books, so refusing is the safer answer.',
+    ),
 });
+
+/** One line from the bill the saree is being matched against. */
+export type BillCandidate = {
+  /** 1-based, matching the numbering shown to the model. */
+  number: number;
+  description: string;
+  quantity: string | null;
+  rate: string | null;
+};
 
 const SYSTEM_PROMPT = `
 You catalogue sarees for Sri Guru Raghavendra Fabrics, a family saree business
@@ -103,6 +128,9 @@ wrong answer costs a customer's trust.
 
 export type TagResult = {
   attributes: TaggedAttributes;
+  /** Which bill line the saree was matched to, or null when no bill was given
+   *  or none of its lines fitted. */
+  matchedNumber: number | null;
   usage: { inputTokens: number; outputTokens: number; estimatedCostUsd: number };
 };
 
@@ -115,15 +143,19 @@ export type TagResult = {
  */
 export async function tagSareePhotos(
   images: { base64: string; mediaType: 'image/jpeg' | 'image/png' | 'image/webp' }[],
+  candidates: BillCandidate[] = [],
 ): Promise<TagResult> {
   if (images.length === 0) throw new Error('At least one photo is required');
 
   const client = new Anthropic();
+  const matching = candidates.length > 0;
 
   const response = await client.messages.parse({
     model: MODEL,
     max_tokens: 2000,
-    output_config: { format: zodOutputFormat(TagSchema) },
+    output_config: {
+      format: zodOutputFormat(matching ? MatchedTagSchema : TagSchema),
+    },
     system: [
       {
         type: 'text',
@@ -150,10 +182,17 @@ export async function tagSareePhotos(
           ),
           {
             type: 'text',
-            text:
+            // The bill's lines belong here rather than in the system prompt.
+            // That prompt is cached and identical for every upload; folding a
+            // different bill into it would throw the cache away each time.
+            text: [
               images.length > 1
                 ? 'These photographs are all of the same saree. Catalogue it.'
                 : 'Catalogue this saree.',
+              matching ? matchingInstructions(candidates) : '',
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
           },
         ],
       },
@@ -172,8 +211,15 @@ export async function tagSareePhotos(
     (response.usage.cache_creation_input_tokens ?? 0);
   const outputTokens = response.usage.output_tokens;
 
+  // matched_item exists only when a bill was supplied, so the parsed value is
+  // read through a record rather than a shape the base schema does not have.
+  const matchedRaw = (parsed as Record<string, unknown>).matched_item;
+  const matchedNumber =
+    matching && typeof matchedRaw === 'number' ? matchedRaw : -1;
+
   return {
     attributes: parsed as TaggedAttributes,
+    matchedNumber: matchedNumber > 0 ? matchedNumber : null,
     usage: {
       inputTokens,
       outputTokens,
@@ -185,4 +231,37 @@ export async function tagSareePhotos(
         1_000_000,
     },
   };
+}
+
+/**
+ * The bill's lines, as the model sees them.
+ *
+ * Quantity and rate are included because they discriminate: six pieces of a
+ * green Gadwal is a far firmer match than "green" alone, and the rate is what
+ * gets copied into the books if the match is accepted.
+ */
+function matchingInstructions(candidates: BillCandidate[]): string {
+  const lines = candidates
+    .map((c) => {
+      const detail = [
+        c.quantity ? `${c.quantity} pcs` : null,
+        c.rate ? `@ ${c.rate}` : null,
+      ]
+        .filter(Boolean)
+        .join(' ');
+      return `${c.number}. ${c.description}${detail ? ` — ${detail}` : ''}`;
+    })
+    .join('\n');
+
+  return `This saree was bought on a bill with these lines:
+
+${lines}
+
+Work out which line it is, using the type, the colour and anything else the
+wording names. Answer with that number in matched_item.
+
+Be willing to say no. If nothing here plausibly describes the saree in the
+photographs, answer -1. The rate on a matched line becomes the recorded cost
+price, so a forced match quietly corrupts the accounts — an honest -1 costs
+nothing but a moment of typing.`;
 }

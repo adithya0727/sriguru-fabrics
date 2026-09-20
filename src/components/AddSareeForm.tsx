@@ -2,12 +2,32 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, Images, AlertCircle, Sparkles } from 'lucide-react';
+import { Camera, Images, AlertCircle, Sparkles, ReceiptText } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
 import { prepareSareePhoto } from '@/lib/photos';
 import type { TaggedAttributes } from '@/lib/types';
+import { formatBillDate } from '@/lib/bills';
 
 type Stage = 'photos' | 'working' | 'review';
+
+/** A bill she can say this saree came from. */
+export type BillChoice = {
+  id: string;
+  company: string;
+  billNumber: string | null;
+  billDate: string | null;
+  itemCount: number;
+};
+
+/** What a matched bill line fills in, kept so it can be shown and saved. */
+type Match = {
+  billId: string;
+  itemName: string;
+  costPrice: number | null;
+  quantity: number | null;
+  supplier: string | null;
+  purchasedOn: string | null;
+};
 
 type Draft = TaggedAttributes & {
   price: string;
@@ -32,8 +52,16 @@ const EMPTY_DRAFT: Draft = {
   quantity_total: '1',
 };
 
-export default function AddSareeForm({ categories }: { categories: string[] }) {
+export default function AddSareeForm({
+  categories,
+  bills,
+}: {
+  categories: string[];
+  bills: BillChoice[];
+}) {
   const router = useRouter();
+  const [billId, setBillId] = useState<string>('');
+  const [match, setMatch] = useState<Match | null>(null);
   const [stage, setStage] = useState<Stage>('photos');
   const [previews, setPreviews] = useState<string[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
@@ -74,9 +102,26 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
       ]);
 
       setPhotoUrls(urls);
+      setMatch(tagged?.match ?? null);
 
-      if (tagged) {
-        setDraft({ ...EMPTY_DRAFT, ...tagged });
+      if (tagged?.attributes) {
+        const found = tagged.match;
+        setDraft({
+          ...EMPTY_DRAFT,
+          ...tagged.attributes,
+          // Straight off the bill rather than guessed from the photograph.
+          // Still shown for confirmation — a wrong match would otherwise put
+          // a wrong cost price into the accounts silently.
+          cost_price: found?.costPrice != null ? String(found.costPrice) : '',
+          // Only when the line is counted in whole pieces. Some are billed by
+          // the metre, and 2.5 metres is not two and a half sarees.
+          quantity_total:
+            found?.quantity != null &&
+            found.quantity >= 1 &&
+            Number.isInteger(found.quantity)
+              ? String(found.quantity)
+              : EMPTY_DRAFT.quantity_total,
+        });
         setAutoFilled(true);
       } else {
         setAutoFilled(false);
@@ -108,16 +153,21 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
 
   async function requestTags(
     images: { base64: string; mediaType: string }[],
-  ): Promise<TaggedAttributes | null> {
+  ): Promise<{ attributes: TaggedAttributes; match: Match | null } | null> {
     try {
       const res = await fetch('/api/tag', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images }),
+        // Only the id travels. The bill's lines are read on the server, since
+        // they decide the cost price that gets recorded.
+        body: JSON.stringify({ images, billId: billId || null }),
       });
       if (!res.ok) return null;
       const json = await res.json();
-      return json.attributes as TaggedAttributes;
+      return {
+        attributes: json.attributes as TaggedAttributes,
+        match: (json.match as Match | null) ?? null,
+      };
     } catch {
       // Tagging is a convenience, never a blocker — a person can always type.
       return null;
@@ -155,6 +205,12 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
         quantity_total: quantity,
         quantity_available: quantity,
         low_confidence: draft.low_confidence,
+        // Family-only. bill_item_name keeps the supplier's own wording so the
+        // words printed on the paper will find this saree in the register.
+        bill_id: match?.billId ?? (billId || null),
+        bill_item_name: match?.itemName ?? null,
+        supplier: match?.supplier ?? null,
+        purchased_on: match?.purchasedOn ?? null,
       });
 
     if (error) {
@@ -191,6 +247,36 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
             {error}
           </p>
+        )}
+
+        {bills.length > 0 && (
+          <div className="mt-7">
+            <label
+              htmlFor="bill"
+              className="block text-sm font-medium text-ink mb-1.5"
+            >
+              Which bill is this from?
+            </label>
+            <select
+              id="bill"
+              value={billId}
+              onChange={(e) => setBillId(e.target.value)}
+              className="field"
+            >
+              <option value="">Not from a bill</option>
+              {bills.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.company}
+                  {b.billDate ? ` · ${formatBillDate(b.billDate)}` : ''}
+                  {` · ${b.itemCount} ${b.itemCount === 1 ? 'item' : 'items'}`}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">
+              Choosing the bill lets the price and the shop's own name for this
+              saree be filled in from it, instead of typed.
+            </p>
+          </div>
         )}
 
         <div className="mt-8 space-y-3">
@@ -291,6 +377,31 @@ export default function AddSareeForm({ categories }: { categories: string[] }) {
         <p className="text-sm text-warn bg-warn-bg border border-gold-300/40 rounded-lg px-3 py-2.5 mt-4">
           {note}
         </p>
+      )}
+
+      {match ? (
+        <div className="card p-4 mt-4 border-good/30 bg-good-bg/50">
+          <p className="flex items-center gap-2 text-sm text-good font-medium">
+            <ReceiptText size={15} className="shrink-0" />
+            Matched to the bill
+          </p>
+          <p className="text-sm text-ink mt-1.5 leading-relaxed">
+            “{match.itemName}”
+          </p>
+          <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">
+            {match.supplier ?? 'Supplier'}
+            {match.costPrice != null &&
+              ` · cost ₹${match.costPrice.toLocaleString('en-IN')} filled in below`}
+            . Worth a glance — if this is the wrong line, clear the cost price.
+          </p>
+        </div>
+      ) : (
+        billId && (
+          <p className="text-sm text-ink-soft bg-canvas-warm border border-line rounded-lg px-3 py-2.5 mt-4 leading-relaxed">
+            No line on that bill matched this saree, so the details below were
+            read from the photos only.
+          </p>
+        )
       )}
 
       {previews.length > 0 && (

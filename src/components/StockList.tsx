@@ -15,6 +15,8 @@ type Row = {
   photos: string[];
   quantity_available: number;
   quantity_total: number;
+  /** The supplier's own wording on their bill, when this saree came from one. */
+  bill_item_name: string | null;
 };
 
 export default function StockList({
@@ -38,11 +40,15 @@ export default function StockList({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return sarees;
+    // The bill's wording is searched alongside the shop's own name, because
+    // the two rarely match: a customer asks about what the supplier called it
+    // and the register calls it something else. Either set of words finds it.
     return sarees.filter(
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q) ||
-        s.id.toLowerCase().includes(q),
+        s.id.toLowerCase().includes(q) ||
+        (s.bill_item_name ?? '').toLowerCase().includes(q),
     );
   }, [sarees, query]);
 
@@ -82,7 +88,7 @@ export default function StockList({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by name or type"
+              placeholder="Search by name, type, or the bill"
               className="field field-icon"
             />
           </div>
@@ -145,6 +151,11 @@ export default function StockList({
                     {s.quantity_total > 1 && (
                       <p className="text-xs text-ink-faint mt-1">
                         {s.quantity_available} of {s.quantity_total} left
+                      </p>
+                    )}
+                    {s.bill_item_name && (
+                      <p className="text-xs text-ink-faint mt-1 truncate">
+                        Bill: {s.bill_item_name}
                       </p>
                     )}
                   </Link>

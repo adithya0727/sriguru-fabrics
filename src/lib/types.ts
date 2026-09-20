@@ -17,6 +17,11 @@ export type Saree = {
   quantity_available: number;
   supplier: string | null;
   purchased_on: string | null;
+  /** The bill this saree was bought on, when it was matched to one. */
+  bill_id: string | null;
+  /** The supplier's own wording for it on that bill, kept searchable so the
+   *  words on the paper find the saree in the app. Family-only. */
+  bill_item_name: string | null;
   low_confidence: string[];
   created_at: string;
   updated_at: string;
@@ -25,7 +30,13 @@ export type Saree = {
 /** What a public page is allowed to know. No cost_price, no supplier. */
 export type PublicSaree = Omit<
   Saree,
-  'cost_price' | 'supplier' | 'purchased_on' | 'quantity_total' | 'low_confidence'
+  | 'cost_price'
+  | 'supplier'
+  | 'purchased_on'
+  | 'quantity_total'
+  | 'low_confidence'
+  | 'bill_id'
+  | 'bill_item_name'
 >;
 
 export type Customer = {

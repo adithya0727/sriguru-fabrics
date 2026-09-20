@@ -25,6 +25,8 @@ In the Supabase dashboard, open **SQL Editor** and run these files, in order:
    the saree types
 5. `supabase/004-store-receipts.sql` — supplier bills, and the **private**
    photo bucket they live in
+6. `supabase/005-link-sarees-to-bills.sql` — links a saree to the bill line it
+   was bought on, so the shop's own wording finds it later
 
 Paste a whole file, press Run, confirm it says success, then move to the next.
 

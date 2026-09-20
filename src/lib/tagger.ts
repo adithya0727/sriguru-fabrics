@@ -10,4 +10,4 @@
 import 'server-only';
 
 export { tagSareePhotos } from './tagger-core';
-export type { TagResult } from './tagger-core';
+export type { TagResult, BillCandidate } from './tagger-core';

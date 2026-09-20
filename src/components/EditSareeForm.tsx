@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2, ArrowLeft } from 'lucide-react';
+import { Trash2, ArrowLeft, ReceiptText } from 'lucide-react';
 import Link from 'next/link';
 import { getBrowserClient } from '@/lib/supabase/client';
 import type { Saree } from '@/lib/types';
+import { formatBillDate } from '@/lib/bills';
 
 export default function EditSareeForm({
   saree,
@@ -96,6 +97,28 @@ export default function EditSareeForm({
       </Link>
 
       <h1 className="font-display text-[1.75rem] text-maroon-900 leading-tight mb-5">Edit saree</h1>
+
+      {saree.bill_item_name && (
+        <div className="card p-4 mb-5">
+          <p className="flex items-center gap-2 eyebrow mb-2">
+            <ReceiptText size={14} className="shrink-0" />
+            On the bill
+          </p>
+          <p className="text-ink leading-relaxed">“{saree.bill_item_name}”</p>
+          <p className="text-xs text-ink-soft mt-1.5">
+            {saree.supplier ?? 'Supplier not recorded'}
+            {saree.purchased_on && ` · bought ${formatBillDate(saree.purchased_on)}`}
+          </p>
+          {saree.bill_id && (
+            <Link
+              href={`/admin/receipts/${saree.bill_id}`}
+              className="btn btn-secondary w-full mt-3 text-sm"
+            >
+              Open the bill
+            </Link>
+          )}
+        </div>
+      )}
 
       {saree.photos.length > 0 && (
         <div className="flex gap-2 mb-5 overflow-x-auto">

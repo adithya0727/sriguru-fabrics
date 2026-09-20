@@ -116,3 +116,19 @@ export function formatBillDate(date: string | null): string {
     year: 'numeric',
   });
 }
+
+/**
+ * A figure off a bill, as a number.
+ *
+ * Bills are stored exactly as printed so they can be checked against the
+ * paper — "1,450.00", "₹890", "12 pcs". Anything that has to be arithmetic
+ * (a cost price, a piece count) goes through here rather than being parsed at
+ * the call site, so Indian digit grouping is handled in one place.
+ */
+export function parseAmount(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const cleaned = value.replace(/[^0-9.]/g, '');
+  if (cleaned === '') return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}

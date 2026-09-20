@@ -10,7 +10,7 @@ export default async function StockPage() {
   const { data, error } = await supabase
     .from('sarees')
     .select(
-      'id, name, category, price, cost_price, photos, quantity_available, quantity_total',
+      'id, name, category, price, cost_price, photos, quantity_available, quantity_total, bill_item_name',
     )
     .gt('quantity_available', 0)
     .order('created_at', { ascending: false });
