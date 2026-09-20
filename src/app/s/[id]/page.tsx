@@ -4,13 +4,14 @@ import { notFound } from 'next/navigation';
 import { getPublicSaree, getSimilarSarees } from '@/lib/queries';
 import { getSiteUrl } from '@/lib/site-url';
 import SareeGallery from '@/components/SareeGallery';
+import { SHOP } from '@/lib/shop';
 
 // Rendered fresh on every request. This is what makes an old WhatsApp link
 // tell the truth: a saree sold three weeks after the message was sent shows as
 // sold when the link is finally opened, with no message to chase or delete.
 export const dynamic = 'force-dynamic';
 
-const WHATSAPP_NUMBER = '919663733683';
+
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -192,7 +193,7 @@ export default async function SareePage({ params }: Props) {
               </p>
             </div>
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${enquiry}`}
+              href={`https://wa.me/${SHOP.whatsapp}?text=${enquiry}`}
               target="_blank"
               rel="noreferrer"
               className="btn btn-whatsapp flex-1"

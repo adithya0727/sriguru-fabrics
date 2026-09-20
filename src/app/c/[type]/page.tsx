@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { listCategories, listPublicSarees } from '@/lib/queries';
 import { categoryFromSlug } from '@/lib/categories';
 import { getSiteUrl } from '@/lib/site-url';
+import { SHOP } from '@/lib/shop';
 import type { PublicSaree } from '@/lib/types';
 
 // Rendered fresh every time, like the single-saree page. This is what makes
@@ -137,12 +138,12 @@ export default async function TypePage({ params }: Props) {
             Sri Guru Raghavendra Fabrics
           </p>
           <p className="text-sm text-ink-soft mt-2">
-            No.3, Puja Classic Apartments, Chikkalasandra
+            {SHOP.addressLines[0]}
             <br />
-            Bangalore 560061
+            {SHOP.addressLines[1]}
           </p>
-          <a href="tel:+919663733683" className="btn btn-secondary mt-5">
-            Call +91 96637 33683
+          <a href={`tel:${SHOP.phoneDial}`} className="btn btn-secondary mt-5">
+            Call {SHOP.phoneDisplay}
           </a>
         </div>
       </footer>

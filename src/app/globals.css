@@ -422,3 +422,47 @@ textarea.field {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   Printing a receipt
+
+   "Save as PDF" prints the generated image rather than a second HTML version
+   of the same receipt. One source of truth: what prints is exactly what was
+   previewed and exactly what would have been sent.
+   ========================================================================== */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  /* The receipt lives inside a fixed, scroll-clipped sheet. Left as it is, a
+     tall receipt would print as whatever fitted one screen. Flattening the
+     overlay lets the image flow down the page — and across pages. */
+  .receipt-overlay,
+  .receipt-overlay * {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible;
+  }
+  .receipt-print img {
+    width: 100%;
+    height: auto;
+  }
+
+  @page {
+    margin: 10mm;
+  }
+}

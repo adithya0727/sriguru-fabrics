@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, ReceiptText, Check, Users } from 'lucide-react';
+import ReceiptSheet from './ReceiptSheet';
 import { getBrowserClient } from '@/lib/supabase/client';
 import type { SaleRow } from '@/lib/types';
 
@@ -22,6 +23,36 @@ const shortDate = (iso: string) =>
 export default function SalesTable({ sales }: { sales: SaleRow[] }) {
   const [editing, setEditing] = useState<SaleRow | null>(null);
 
+  // Picking rows is a mode rather than a long press. Long press on the web
+  // fights text selection, shows no affordance, and behaves differently in
+  // every browser — a button says plainly that it is there.
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [showReceipt, setShowReceipt] = useState(false);
+
+  function toggle(id: string) {
+    setPicked((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function stopPicking() {
+    setPicking(false);
+    setPicked(new Set());
+  }
+
+  const chosen = sales.filter((s) => picked.has(s.id));
+
+  // Usually it is all one person's shopping, so offer the rest of their sales
+  // in a tap rather than making her find each line.
+  const firstName = chosen[0]?.customer_name ?? null;
+  const sameNameOutstanding = firstName
+    ? sales.filter((s) => s.customer_name === firstName && !picked.has(s.id))
+    : [];
+
   if (sales.length === 0) {
     return (
       <div className="text-center py-16 px-5">
@@ -39,6 +70,16 @@ export default function SalesTable({ sales }: { sales: SaleRow[] }) {
 
   return (
     <>
+      {!picking && (
+        <button
+          onClick={() => setPicking(true)}
+          className="btn btn-secondary w-full text-sm mb-3"
+        >
+          <ReceiptText size={15} />
+          Generate a receipt
+        </button>
+      )}
+
       <div className="-mx-5">
         <table className="w-full border-collapse">
           <thead>
@@ -64,14 +105,31 @@ export default function SalesTable({ sales }: { sales: SaleRow[] }) {
               return (
                 <tr
                   key={sale.id}
-                  onClick={() => setEditing(sale)}
-                  className="border-b border-line cursor-pointer hover:bg-canvas-warm/60 transition-colors"
+                  onClick={() => (picking ? toggle(sale.id) : setEditing(sale))}
+                  className={`border-b border-line cursor-pointer transition-colors ${
+                    picked.has(sale.id)
+                      ? 'bg-maroon-50'
+                      : 'hover:bg-canvas-warm/60'
+                  }`}
                 >
                   <td className="px-3 py-3 pl-5 align-top">
-                    <p className="text-sm text-ink truncate max-w-[7.5rem]">
-                      {sale.customer_name || (
-                        <span className="text-ink-faint">Walk-in</span>
+                    <p className="text-sm text-ink truncate max-w-[7.5rem] flex items-center gap-1.5">
+                      {picking && (
+                        <span
+                          className={`shrink-0 w-4 h-4 rounded border flex items-center justify-center ${
+                            picked.has(sale.id)
+                              ? 'bg-maroon-700 border-maroon-700 text-white'
+                              : 'border-line-strong'
+                          }`}
+                        >
+                          {picked.has(sale.id) && <Check size={11} strokeWidth={3} />}
+                        </span>
                       )}
+                      <span className="truncate">
+                        {sale.customer_name || (
+                          <span className="text-ink-faint">Walk-in</span>
+                        )}
+                      </span>
                     </p>
                     <p className="text-[0.6875rem] text-ink-faint tabular-nums mt-0.5">
                       #{total - i} · {shortDate(sale.sold_at)}
@@ -109,6 +167,58 @@ export default function SalesTable({ sales }: { sales: SaleRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {picking && (
+        // Sits clear of the tab bar rather than over it — the way out of this
+        // mode must never be the thing a thumb covers.
+        <div className="fixed inset-x-0 bottom-16 z-40 px-5">
+          <div className="max-w-lg mx-auto card shadow-lg p-3">
+            {sameNameOutstanding.length > 0 && (
+              <button
+                onClick={() =>
+                  setPicked(
+                    (current) =>
+                      new Set([
+                        ...current,
+                        ...sameNameOutstanding.map((s) => s.id),
+                      ]),
+                  )
+                }
+                className="btn btn-ghost w-full !min-h-0 py-2 text-sm mb-1"
+              >
+                <Users size={15} />
+                Add {sameNameOutstanding.length} more of {firstName}&rsquo;s
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={stopPicking}
+                className="btn btn-ghost !min-h-0 py-2.5 px-3 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setShowReceipt(true)}
+                disabled={picked.size === 0}
+                className="btn btn-primary flex-1 !min-h-0 py-2.5 text-sm"
+              >
+                Receipt for {picked.size}{' '}
+                {picked.size === 1 ? 'item' : 'items'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReceipt && chosen.length > 0 && (
+        <ReceiptSheet
+          sales={chosen}
+          onClose={() => {
+            setShowReceipt(false);
+            stopPicking();
+          }}
+        />
+      )}
 
       {editing && (
         <SaleSheet

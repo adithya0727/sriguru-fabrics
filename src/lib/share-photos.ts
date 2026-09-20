@@ -1,7 +1,10 @@
 'use client';
 
 /**
- * Sending a set of sarees to WhatsApp as an album of real photos.
+ * Handing files to WhatsApp — saree photos as an album, and receipts.
+ *
+ * The saree case is what shaped it, and is described below; ReceiptSheet
+ * reuses the same two functions to send a single generated receipt image.
  *
  * WhatsApp only unfurls a preview card for the FIRST link in a message, so a
  * message holding eight links shows one photo and seven bare URLs. The only
