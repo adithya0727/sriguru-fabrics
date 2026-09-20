@@ -34,6 +34,12 @@ export const metadata: Metadata = {
     title: 'Sri Guru',
     statusBarStyle: 'default',
   },
+  other: {
+    // Next emits the modern `mobile-web-app-capable`. iPhones older than
+    // iOS 15.4 only understand Apple's original name, and without it they
+    // open the home-screen icon in a normal Safari tab rather than fullscreen.
+    'apple-mobile-web-app-capable': 'yes',
+  },
 };
 
 /** Paints the phone's address bar in the shop's maroon, and lets iOS run it
