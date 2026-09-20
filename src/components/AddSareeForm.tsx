@@ -2,7 +2,14 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, Images, AlertCircle, Sparkles, ReceiptText } from 'lucide-react';
+import {
+  Camera,
+  Images,
+  AlertCircle,
+  Sparkles,
+  ReceiptText,
+  RefreshCw,
+} from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
 import { prepareSareePhoto } from '@/lib/photos';
 import type { TaggedAttributes } from '@/lib/types';
@@ -62,6 +69,13 @@ export default function AddSareeForm({
   const router = useRouter();
   const [billId, setBillId] = useState<string>('');
   const [markup, setMarkup] = useState('');
+  // Kept so a failed read can be retried without photographing again — the
+  // photos are already uploaded by then, and asking her to reshoot for a
+  // timeout that was never her fault is the wrong answer.
+  const [readable, setReadable] = useState<
+    { base64: string; mediaType: string }[]
+  >([]);
+  const [rereading, setRereading] = useState(false);
   const [match, setMatch] = useState<Match | null>(null);
   const [stage, setStage] = useState<Stage>('photos');
   const [previews, setPreviews] = useState<string[]>([]);
@@ -90,16 +104,19 @@ export default function AddSareeForm({
       // Upload and tag at the same time. In sequence this is two waits; in
       // parallel it's one, and the whole point is that adding a saree has to
       // feel faster than not bothering.
+      // One photo, not two. Measured, a second image roughly triples how long
+      // the read takes — 15-37s against 7-20s — and the host kills the request
+      // well before the longer end. A read that times out tells you nothing at
+      // all, which is worse than one that saw only the full drape.
+      const forReading = prepared.slice(0, 1).map((p) => ({
+        base64: p.taggingBase64,
+        mediaType: p.mediaType,
+      }));
+      setReadable(forReading);
+
       const [urls, tagged] = await Promise.all([
         uploadAll(prepared.map((p) => p.display)),
-        requestTags(
-          // The border close-up carries most of the identifying detail, so
-          // send at most two photos: the full drape and the next one.
-          prepared.slice(0, 2).map((p) => ({
-            base64: p.taggingBase64,
-            mediaType: p.mediaType,
-          })),
-        ),
+        requestTags(forReading),
       ]);
 
       setPhotoUrls(urls);
@@ -126,9 +143,6 @@ export default function AddSareeForm({
         setAutoFilled(true);
       } else {
         setAutoFilled(false);
-        setNote(
-          'Could not read the photos automatically — please fill in the details.',
-        );
       }
       setStage('review');
     } catch (e) {
@@ -152,9 +166,20 @@ export default function AddSareeForm({
     );
   }
 
+  /**
+   * Ask the server to read the photos.
+   *
+   * Tagging is a convenience and never blocks saving, but the reason it failed
+   * is recorded rather than swallowed. Treating every failure as "could not
+   * read the photos" hid a host timeout for days: the message said the model
+   * had looked and failed, when in truth it was never given the chance.
+   */
   async function requestTags(
     images: { base64: string; mediaType: string }[],
   ): Promise<{ attributes: TaggedAttributes; match: Match | null } | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 55_000);
+
     try {
       const res = await fetch('/api/tag', {
         method: 'POST',
@@ -162,17 +187,50 @@ export default function AddSareeForm({
         // Only the id travels. The bill's lines are read on the server, since
         // they decide the cost price that gets recorded.
         body: JSON.stringify({ images, billId: billId || null }),
+        signal: controller.signal,
       });
-      if (!res.ok) return null;
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setNote(
+          body?.error
+            ? `Could not read the photos: ${body.error}`
+            : `Could not read the photos — the reader answered ${res.status}. Try again, or type the details.`,
+        );
+        return null;
+      }
+
       const json = await res.json();
       return {
         attributes: json.attributes as TaggedAttributes,
         match: (json.match as Match | null) ?? null,
       };
-    } catch {
-      // Tagging is a convenience, never a blocker — a person can always type.
+    } catch (e) {
+      const stopped = e instanceof DOMException && e.name === 'AbortError';
+      setNote(
+        stopped
+          ? 'Reading the photos took too long and was stopped. The photos are saved — try reading them again, or just type the details.'
+          : `Could not reach the reader: ${e instanceof Error ? e.message : 'no connection'}. The photos are saved.`,
+      );
       return null;
+    } finally {
+      clearTimeout(timer);
     }
+  }
+
+  /** Retry the read on photos that are already uploaded. */
+  async function readAgain() {
+    if (readable.length === 0 || rereading) return;
+    setRereading(true);
+    setNote(null);
+
+    const tagged = await requestTags(readable);
+    if (tagged?.attributes) {
+      setMatch(tagged.match);
+      setDraft((current) => ({ ...current, ...tagged.attributes }));
+      setAutoFilled(true);
+    }
+    setRereading(false);
   }
 
   async function handleSave() {
@@ -405,9 +463,19 @@ export default function AddSareeForm({
         </p>
       )}
       {note && (
-        <p className="text-sm text-warn bg-warn-bg border border-gold-300/40 rounded-lg px-3 py-2.5 mt-4">
-          {note}
-        </p>
+        <div className="text-sm text-warn bg-warn-bg border border-gold-300/40 rounded-lg px-3 py-2.5 mt-4">
+          <p className="leading-relaxed">{note}</p>
+          {readable.length > 0 && (
+            <button
+              onClick={readAgain}
+              disabled={rereading}
+              className="btn btn-secondary w-full mt-3 text-sm"
+            >
+              <RefreshCw size={15} className={rereading ? 'animate-spin' : ''} />
+              {rereading ? 'Reading again…' : 'Read the photos again'}
+            </button>
+          )}
+        </div>
       )}
 
       {match ? (

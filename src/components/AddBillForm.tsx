@@ -63,8 +63,8 @@ export default function AddBillForm({ companies }: { companies: BillCompany[] })
       setPhotoPath(path);
 
       if (!extracted) {
+        // read() has already said what actually went wrong; don't paper over it.
         setDraft(emptyDraft());
-        setError('Could not read this bill — please enter it by hand.');
       } else {
         setDraft(draftFrom(extracted, companies));
       }
@@ -86,21 +86,50 @@ export default function AddBillForm({ companies }: { companies: BillCompany[] })
     return path;
   }
 
+  /**
+   * Ask the server to read the bill.
+   *
+   * Reading is a convenience and never blocks entering a bill by hand, but the
+   * reason it failed is reported rather than swallowed. A silent catch here
+   * makes a host timeout look exactly like a model that read the page and gave
+   * up, and the two need completely different responses.
+   */
   async function read(
     base64: string,
     mediaType: string,
   ): Promise<Extracted | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 55_000);
+
     try {
       const res = await fetch('/api/receipt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: { base64, mediaType } }),
+        signal: controller.signal,
       });
-      if (!res.ok) return null;
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(
+          body?.error
+            ? `Could not read this bill: ${body.error}`
+            : `Could not read this bill — the reader answered ${res.status}. Enter it by hand, or try another photo.`,
+        );
+        return null;
+      }
+
       return (await res.json()).receipt as Extracted;
-    } catch {
-      // Reading is a convenience, never a blocker — it can always be typed.
+    } catch (e) {
+      const stopped = e instanceof DOMException && e.name === 'AbortError';
+      setError(
+        stopped
+          ? 'Reading this bill took too long and was stopped. The photo is saved — enter the details by hand, or try again with a tighter, brighter photo.'
+          : `Could not reach the reader: ${e instanceof Error ? e.message : 'no connection'}. The photo is saved.`,
+      );
       return null;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
