@@ -253,14 +253,6 @@ export default function StockList({
               </select>
             </div>
 
-            <button
-              onClick={() => setSendingType(true)}
-              className="btn btn-secondary w-full text-sm"
-            >
-              <Layers size={15} />
-              Send a whole type
-            </button>
-
             {(activeFilters > 0 || query) && (
               <button
                 onClick={clearAll}
@@ -271,6 +263,16 @@ export default function StockList({
             )}
           </div>
         )}
+      </div>
+
+      <div className="px-5 pb-3">
+        <button
+          onClick={() => setSendingType(true)}
+          className="btn btn-secondary w-full"
+        >
+          <Layers size={16} />
+          Send a whole type
+        </button>
       </div>
 
       {filtered.length === 0 ? (
