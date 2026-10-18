@@ -25,14 +25,30 @@
  */
 
 /**
- * How many photos go in one share — WhatsApp's own limit per message.
- *
- * This used to be 10, on the theory that a longer album stops being
- * browsable. That was the wrong call: a whole type is exactly what someone
- * asks to see, and quietly sending a quarter of it looked like a bug. A type
- * larger than this is sent in batches rather than truncated.
+ * Chrome refuses a share of more than ten files outright — the error reads
+ * "Permission denied" — and every Android browser is Chrome underneath.
+ * Safari, which every iPhone browser uses, has no such cap.
  */
-export const PHOTOS_PER_SEND = 100;
+export const CHROME_FILES_PER_SHARE = 10;
+
+/** WhatsApp's own limit on photos in one message. */
+const WHATSAPP_PHOTOS_PER_MESSAGE = 100;
+
+/**
+ * The most photos one share can carry on this phone.
+ *
+ * Ten on the shop's Android phone, so a whole type goes in parts; a whole
+ * type in one go on an iPhone. Raising this to a hundred everywhere, to stop
+ * a forty-saree type arriving as ten, fixed the iPhone and broke Android.
+ */
+export function photosPerShare(): number {
+  if (typeof window === 'undefined') return CHROME_FILES_PER_SHARE;
+  // userAgentData exists only in Chrome-based browsers; the Android test
+  // covers older ones without it.
+  const chrome =
+    'userAgentData' in navigator || /Android/i.test(navigator.userAgent);
+  return chrome ? CHROME_FILES_PER_SHARE : WHATSAPP_PHOTOS_PER_MESSAGE;
+}
 
 /** Photos prepared at once. Enough to overlap the downloads, few enough that
  *  a mid-range phone is not holding a dozen full-size canvases at the same
@@ -100,9 +116,9 @@ export async function buildLabelledPhoto(
 
 /** Hand the album to WhatsApp. Returns false if the share sheet was dismissed,
  *  which is a normal thing to do and not an error to report. */
-export async function sharePhotos(files: File[], text: string): Promise<boolean> {
+export async function sharePhotos(files: File[], text?: string): Promise<boolean> {
   try {
-    await navigator.share({ files, text });
+    await navigator.share(text ? { files, text } : { files });
     return true;
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return false;

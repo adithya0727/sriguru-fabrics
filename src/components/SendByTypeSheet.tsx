@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Images, Link2, AlertCircle } from 'lucide-react';
+import { X, Images, Link2, AlertCircle, Check } from 'lucide-react';
 import { categorySlug } from '@/lib/categories';
 import {
-  PHOTOS_PER_SEND,
+  CHROME_FILES_PER_SHARE,
+  photosPerShare,
   prepareAlbum,
   photoSharingSupported,
   sharePhotos,
@@ -59,16 +60,21 @@ export default function SendByTypeSheet({
     category: string;
     files: File[];
     caption: string;
-    /** 1-based position of this batch within the type, for the label. */
-    from: number;
-    to: number;
-    total: number;
     failed: number;
   } | null>(null);
 
-  // How far through each type's photos this session has already sent. Only
-  // matters for a type larger than one WhatsApp message can hold.
-  const [sentUpTo, setSentUpTo] = useState<Record<string, number>>({});
+  // The whole type is prepared once, then sent in as many parts as this
+  // phone needs: ten photos a part on Android, all of them at once on an
+  // iPhone. Each part is its own tap, so each share has a live gesture.
+  const [perShare, setPerShare] = useState(photosPerShare);
+  const [sentParts, setSentParts] = useState<number[]>([]);
+
+  const parts = ready ? splitIntoParts(ready.files, perShare) : [];
+  const nextPart = parts.findIndex((_, i) => !sentParts.includes(i));
+  const allSent = parts.length > 1 && nextPart === -1;
+  // Half-way through, a stray tap outside the sheet would lose track of
+  // which parts have gone, so only the buttons close it then.
+  const midway = sentParts.length > 0 && !allSent;
 
   // Only types actually on the rack. Offering "Chiffon (0)" invites a tap
   // that can only disappoint.
@@ -98,6 +104,7 @@ export default function SendByTypeSheet({
   async function preparePhotos(group: Group) {
     setError(null);
     setReady(null);
+    setSentParts([]);
 
     if (!photoSharingSupported()) {
       setError(
@@ -113,17 +120,12 @@ export default function SendByTypeSheet({
       return;
     }
 
-    // All of them, unless the type is bigger than one WhatsApp message can
-    // hold — then the next batch picks up where the last one stopped.
-    const start = sentUpTo[group.category] ?? 0;
-    const batch = withPhotos.slice(start, start + PHOTOS_PER_SEND);
-
     setBusy(group.category);
-    setProgress({ done: 0, total: batch.length });
+    setProgress({ done: 0, total: withPhotos.length });
 
     try {
       const { files, failed } = await prepareAlbum(
-        batch.map((saree) => ({
+        withPhotos.map((saree) => ({
           photoUrl: saree.photos[0],
           label: `${saree.name} — ${rupees(saree.price)}`,
           fileName: `${saree.id}.jpg`,
@@ -136,15 +138,7 @@ export default function SendByTypeSheet({
         return;
       }
 
-      setReady({
-        category: group.category,
-        files,
-        caption: captionFor(group),
-        from: start + 1,
-        to: start + batch.length,
-        total: withPhotos.length,
-        failed,
-      });
+      setReady({ category: group.category, files, caption: captionFor(group), failed });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not prepare the photos');
     } finally {
@@ -152,35 +146,44 @@ export default function SendByTypeSheet({
     }
   }
 
-  function sendPrepared() {
+  function sendPart(index: number) {
     if (!ready) return;
     setError(null);
 
+    const files = parts[index];
+    const single = parts.length === 1;
+    // The heading goes with the first part only; on every part it reads as
+    // the same message sent four times.
+    const caption = index === 0 ? ready.caption : undefined;
+
     // Nothing is awaited before this call on purpose: the share has to happen
     // inside the gesture that triggered it, and an await here would spend it.
-    const sent = ready;
-    sharePhotos(sent.files, sent.caption)
+    sharePhotos(files, caption)
       .then((shared) => {
         if (!shared) return;
-        if (sent.to < sent.total) {
-          // More to go: remember where this batch ended and stay open, so the
-          // next tap prepares the rest instead of starting from the top.
-          setSentUpTo((m) => ({ ...m, [sent.category]: sent.to }));
-          setReady(null);
-        } else {
-          setSentUpTo((m) => ({ ...m, [sent.category]: 0 }));
-          onClose();
-        }
+        if (single) onClose();
+        else setSentParts((s) => (s.includes(index) ? s : [...s, index]));
       })
-      .catch((e) =>
-        setError(e instanceof Error ? e.message : 'Could not open WhatsApp'),
-      );
+      .catch((e) => {
+        // A browser with Chrome's cap that was not recognised as one. Split
+        // into tens rather than fail again; the parts explain themselves.
+        if (
+          e instanceof DOMException &&
+          e.name === 'NotAllowedError' &&
+          files.length > CHROME_FILES_PER_SHARE
+        ) {
+          setPerShare(CHROME_FILES_PER_SHARE);
+          setSentParts([]);
+          return;
+        }
+        setError(e instanceof Error ? e.message : 'Could not open WhatsApp');
+      });
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-end bg-ink/40 backdrop-blur-[2px]"
-      onClick={busy ? undefined : onClose}
+      onClick={busy || midway ? undefined : onClose}
     >
       <div
         className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 pb-(--sheet-bottom) max-h-[90vh] overflow-y-auto rise"
@@ -231,8 +234,7 @@ export default function SendByTypeSheet({
               const isReady = ready?.category === group.category;
               const withPhotos = group.sarees.filter((s) => s.photos[0]).length;
               const missing = group.sarees.length - withPhotos;
-              const batches = Math.ceil(withPhotos / PHOTOS_PER_SEND);
-              const resumeFrom = sentUpTo[group.category] ?? 0;
+              const batches = Math.ceil(withPhotos / perShare);
 
               return (
                 <li key={group.category} className="card overflow-hidden">
@@ -260,7 +262,7 @@ export default function SendByTypeSheet({
                       Preparing {progress.done} of {progress.total}…
                     </p>
                   ) : isReady ? (
-                    // Separate tap, so the share happens inside a live gesture.
+                    // Separate taps, so each share happens inside a live gesture.
                     <div className="border-t border-line p-3">
                       {ready.failed > 0 && (
                         <p className="text-xs text-warn mb-2 leading-relaxed">
@@ -269,22 +271,52 @@ export default function SendByTypeSheet({
                           loaded and {ready.failed === 1 ? 'was' : 'were'} left out.
                         </p>
                       )}
+                      {parts.length === 1 ? (
+                        <button
+                          onClick={() => sendPart(0)}
+                          className="btn btn-primary w-full"
+                        >
+                          <Images size={16} />
+                          Send {ready.files.length}{' '}
+                          {ready.files.length === 1 ? 'photo' : 'photos'}
+                        </button>
+                      ) : (
+                        <>
+                          <p className="text-xs text-ink-soft mb-2.5 leading-relaxed">
+                            {allSent
+                              ? `All ${ready.files.length} photos sent.`
+                              : `This phone sends ${perShare} photos at a time. Send a part, come back here, then send the next.`}
+                          </p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {parts.map((part, i) => {
+                              const from = i * perShare + 1;
+                              const to = from + part.length - 1;
+                              const sent = sentParts.includes(i);
+                              return (
+                                <button
+                                  key={from}
+                                  onClick={() => sendPart(i)}
+                                  className={`btn px-3 text-sm tabular-nums ${
+                                    i === nextPart
+                                      ? 'btn-primary'
+                                      : `btn-secondary ${sent ? 'text-good' : ''}`
+                                  }`}
+                                >
+                                  {sent ? <Check size={15} /> : <Images size={15} />}
+                                  {i === nextPart ? `Send ${from}–${to}` : `${from}–${to}`}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
                       <button
-                        onClick={sendPrepared}
-                        className="btn btn-primary w-full"
+                        onClick={allSent ? onClose : () => setReady(null)}
+                        className={`btn btn-ghost w-full !min-h-0 py-2 mt-1 text-sm ${
+                          allSent ? 'text-maroon-700 font-medium' : ''
+                        }`}
                       >
-                        <Images size={16} />
-                        Send {ready.files.length}{' '}
-                        {ready.files.length === 1 ? 'photo' : 'photos'}
-                        {ready.total > ready.to || ready.from > 1
-                          ? ` (${ready.from}–${ready.to} of ${ready.total})`
-                          : ''}
-                      </button>
-                      <button
-                        onClick={() => setReady(null)}
-                        className="btn btn-ghost w-full !min-h-0 py-2 mt-1 text-sm"
-                      >
-                        Cancel
+                        {allSent ? 'Done' : 'Cancel'}
                       </button>
                     </div>
                   ) : (
@@ -295,9 +327,7 @@ export default function SendByTypeSheet({
                         className="py-3 text-sm font-medium text-maroon-700 hover:bg-maroon-50 transition-colors border-r border-line flex items-center justify-center gap-1.5"
                       >
                         <Images size={15} />
-                        {resumeFrom > 0
-                          ? `Next ${Math.min(PHOTOS_PER_SEND, withPhotos - resumeFrom)}`
-                          : 'Photos'}
+                        Photos
                       </button>
                       <a
                         href={`https://wa.me/?text=${encodeURIComponent(
@@ -320,4 +350,10 @@ export default function SendByTypeSheet({
       </div>
     </div>
   );
+}
+
+function splitIntoParts<T>(items: T[], size: number): T[][] {
+  const parts: T[][] = [];
+  for (let i = 0; i < items.length; i += size) parts.push(items.slice(i, i + size));
+  return parts;
 }
