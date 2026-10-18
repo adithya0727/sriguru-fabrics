@@ -4,7 +4,10 @@ import { readReceipt } from '@/lib/receipts';
 
 export const maxDuration = 60;
 
-const MAX_BASE64_BYTES = 2_000_000; // ~1.5MB of image; a 1024px JPEG is well under
+// ~3MB of image. A 2576px bill JPEG is ~1-1.6MB, which is ~1.4-2.2MB once
+// base64-encoded; this leaves headroom while staying well inside the host's
+// 6MB request limit.
+const MAX_BASE64_BYTES = 4_000_000;
 
 /**
  * Reads a photographed bill and returns it as a table.

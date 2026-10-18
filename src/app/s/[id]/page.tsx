@@ -183,7 +183,7 @@ export default async function SareePage({ params }: Props) {
       {/* Sticky so the enquiry is always one thumb-reach away, however far
           down the page someone has read. */}
       {!sold && (
-        <div className="fixed bottom-0 inset-x-0 z-30 bg-canvas/90 backdrop-blur-md border-t border-line">
+        <div className="fixed bottom-0 inset-x-0 z-30 bg-canvas/90 backdrop-blur-md border-t border-line pb-(--nl-badge-clearance)">
           <div className="max-w-lg mx-auto px-5 py-3 flex items-center gap-4">
             <div className="min-w-0">
               <p className="text-[0.6875rem] uppercase tracking-wider text-ink-faint">

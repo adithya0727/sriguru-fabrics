@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Camera,
@@ -13,7 +13,10 @@ import {
 import { getBrowserClient } from '@/lib/supabase/client';
 import { prepareSareePhoto } from '@/lib/photos';
 import type { TaggedAttributes } from '@/lib/types';
-import { formatBillDate } from '@/lib/bills';
+import { formatBillDate, parseAmount } from '@/lib/bills';
+import { BORDERS, FABRICS } from '@/lib/vocabulary';
+import ChoiceField from './ChoiceField';
+import BillLinePicker, { type LineChoice } from './BillLinePicker';
 
 type Stage = 'photos' | 'working' | 'review';
 
@@ -23,23 +26,15 @@ export type BillChoice = {
   company: string;
   billNumber: string | null;
   billDate: string | null;
-  itemCount: number;
+  lines: { description: string; rate: string | null }[];
 };
 
-/** What a matched bill line fills in, kept so it can be shown and saved. */
-type Match = {
-  billId: string;
-  itemName: string;
-  costPrice: number | null;
-  quantity: number | null;
-  supplier: string | null;
-  purchasedOn: string | null;
-};
+/** The line the reader matched, if it was sure enough to name one. */
+type Match = { lineNumber: number };
 
 type Draft = TaggedAttributes & {
   price: string;
   cost_price: string;
-  quantity_total: string;
 };
 
 const EMPTY_DRAFT: Draft = {
@@ -56,7 +51,6 @@ const EMPTY_DRAFT: Draft = {
   low_confidence: [],
   price: '',
   cost_price: '',
-  quantity_total: '1',
 };
 
 export default function AddSareeForm({
@@ -76,7 +70,10 @@ export default function AddSareeForm({
     { base64: string; mediaType: string }[]
   >([]);
   const [rereading, setRereading] = useState(false);
-  const [match, setMatch] = useState<Match | null>(null);
+  // What the reader suggested, and what she has settled on. Kept apart so
+  // the suggestion can stay marked even after she taps a different line.
+  const [suggestedLine, setSuggestedLine] = useState<number | null>(null);
+  const [chosenLine, setChosenLine] = useState<LineChoice>(null);
   const [stage, setStage] = useState<Stage>('photos');
   const [previews, setPreviews] = useState<string[]>([]);
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
@@ -85,6 +82,12 @@ export default function AddSareeForm({
   const [error, setError] = useState<string | null>(null);
   const [autoFilled, setAutoFilled] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const bill = bills.find((b) => b.id === billId) ?? null;
+
+  // Previews are object URLs; release them when replaced or on leaving, or a
+  // long session of adding sarees slowly holds every photo in memory.
+  useEffect(() => () => previews.forEach((u) => URL.revokeObjectURL(u)), [previews]);
 
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -104,11 +107,12 @@ export default function AddSareeForm({
       // Upload and tag at the same time. In sequence this is two waits; in
       // parallel it's one, and the whole point is that adding a saree has to
       // feel faster than not bothering.
-      // One photo, not two. Measured, a second image roughly triples how long
-      // the read takes — 15-37s against 7-20s — and the host kills the request
-      // well before the longer end. A read that times out tells you nothing at
-      // all, which is worse than one that saw only the full drape.
-      const forReading = prepared.slice(0, 1).map((p) => ({
+      //
+      // Every photo she chose goes to the reader. With the old model a second
+      // photo tripled the wait past the host's limit, so only one was sent;
+      // the current one answers in about three seconds, and a border or pallu
+      // close-up is exactly what it needs to stop guessing the border.
+      const forReading = prepared.map((p) => ({
         base64: p.taggingBase64,
         mediaType: p.mediaType,
       }));
@@ -120,28 +124,23 @@ export default function AddSareeForm({
       ]);
 
       setPhotoUrls(urls);
-      setMatch(tagged?.match ?? null);
+
+      const line = tagged?.match ? tagged.match.lineNumber - 1 : null;
+      setSuggestedLine(line);
+      setChosenLine(line);
 
       if (tagged?.attributes) {
-        const found = tagged.match;
         setDraft({
           ...EMPTY_DRAFT,
           ...tagged.attributes,
           // Straight off the bill rather than guessed from the photograph.
-          // Still shown for confirmation — a wrong match would otherwise put
-          // a wrong cost price into the accounts silently.
-          cost_price: found?.costPrice != null ? String(found.costPrice) : '',
-          // Only when the line is counted in whole pieces. Some are billed by
-          // the metre, and 2.5 metres is not two and a half sarees.
-          quantity_total:
-            found?.quantity != null &&
-            found.quantity >= 1 &&
-            Number.isInteger(found.quantity)
-              ? String(found.quantity)
-              : EMPTY_DRAFT.quantity_total,
+          // Still shown, selected, among the other lines — a wrong match would
+          // otherwise put a wrong cost price into the accounts silently.
+          cost_price: line != null ? rateOf(line) : '',
         });
         setAutoFilled(true);
       } else {
+        setDraft({ ...EMPTY_DRAFT, cost_price: line != null ? rateOf(line) : '' });
         setAutoFilled(false);
       }
       setStage('review');
@@ -226,8 +225,15 @@ export default function AddSareeForm({
 
     const tagged = await requestTags(readable);
     if (tagged?.attributes) {
-      setMatch(tagged.match);
-      setDraft((current) => ({ ...current, ...tagged.attributes }));
+      const line = tagged.match ? tagged.match.lineNumber - 1 : null;
+      setSuggestedLine(line);
+      // Follow the new suggestion only if she hasn't already picked a line.
+      if (chosenLine === null && line != null) {
+        setChosenLine(line);
+        setDraft((current) => ({ ...current, ...tagged.attributes, cost_price: rateOf(line) }));
+      } else {
+        setDraft((current) => ({ ...current, ...tagged.attributes }));
+      }
       setAutoFilled(true);
     }
     setRereading(false);
@@ -235,6 +241,12 @@ export default function AddSareeForm({
 
   async function handleSave() {
     setError(null);
+    // A saree without a name goes public as "Untitled saree" — on the
+    // catalogue, and once on the shop's own WhatsApp card.
+    if (!draft.name.trim()) {
+      setError('Please give this saree a name.');
+      return;
+    }
     const price = Number(draft.price);
     if (!Number.isFinite(price) || price <= 0) {
       setError('Please enter the selling price.');
@@ -242,13 +254,17 @@ export default function AddSareeForm({
     }
 
     setSaving(true);
-    const quantity = Math.max(1, Number(draft.quantity_total) || 1);
     const supabase = getBrowserClient();
+
+    // From the bill unless she said it isn't. A line gives the supplier's own
+    // wording; the bill alone still tells us who sold it, and when.
+    const fromBill = bill && chosenLine !== 'none' ? bill : null;
+    const line = fromBill && typeof chosenLine === 'number' ? fromBill.lines[chosenLine] : null;
 
     const { error } = await supabase
       .from('sarees')
       .insert({
-        name: draft.name || 'Untitled saree',
+        name: draft.name.trim(),
         description: draft.description,
         category: draft.category,
         photos: photoUrls,
@@ -261,15 +277,16 @@ export default function AddSareeForm({
         occasion: draft.occasion,
         price,
         cost_price: draft.cost_price ? Number(draft.cost_price) : null,
-        quantity_total: quantity,
-        quantity_available: quantity,
+        // One saree, one entry: she photographs and lists them individually.
+        quantity_total: 1,
+        quantity_available: 1,
         low_confidence: draft.low_confidence,
         // Family-only. bill_item_name keeps the supplier's own wording so the
         // words printed on the paper will find this saree in the register.
-        bill_id: match?.billId ?? (billId || null),
-        bill_item_name: match?.itemName ?? null,
-        supplier: match?.supplier ?? null,
-        purchased_on: match?.purchasedOn ?? null,
+        bill_id: fromBill?.id ?? null,
+        bill_item_name: line?.description ?? null,
+        supplier: fromBill?.company ?? null,
+        purchased_on: fromBill?.billDate ?? null,
       });
 
     if (error) {
@@ -282,6 +299,25 @@ export default function AddSareeForm({
     // Send button is on the row, so there is nothing to confirm on the way.
     router.push('/admin');
     router.refresh();
+  }
+
+  /** A bill line's rate as the cost-price field expects it, or ''. */
+  function rateOf(index: number): string {
+    const rate = parseAmount(bill?.lines[index]?.rate);
+    return rate != null ? String(rate) : '';
+  }
+
+  /** Tapping a line fills its cost — through changeCost, so a percentage she
+   *  already chose carries straight on to the selling price. */
+  function chooseLine(choice: LineChoice) {
+    const previous = typeof chosenLine === 'number' ? rateOf(chosenLine) : '';
+    setChosenLine(choice);
+    if (typeof choice === 'number') {
+      changeCost(rateOf(choice));
+    } else if (previous && draft.cost_price === previous) {
+      // Leaving a line takes its cost with it — but never a cost she typed.
+      changeCost('');
+    }
   }
 
   /** Cost plus a percentage, to the nearest rupee. */
@@ -324,8 +360,8 @@ export default function AddSareeForm({
           Add a saree
         </h1>
         <p className="text-ink-soft mt-2.5 leading-relaxed">
-          Three photos is ideal — the full saree, the border, and the pallu.
-          Everything else fills in by itself.
+          Photograph the whole saree, spread out in good light. Everything else
+          fills in by itself.
         </p>
 
         {error && (
@@ -357,13 +393,13 @@ export default function AddSareeForm({
                 <option key={b.id} value={b.id}>
                   {b.company}
                   {b.billDate ? ` · ${formatBillDate(b.billDate)}` : ''}
-                  {` · ${b.itemCount} ${b.itemCount === 1 ? 'item' : 'items'}`}
+                  {` · ${b.lines.length} ${b.lines.length === 1 ? 'item' : 'items'}`}
                 </option>
               ))}
             </select>
             <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">
-              Choosing the bill lets the price and the shop's own name for this
-              saree be filled in from it, instead of typed.
+              Choosing the bill fills in the cost price from it, so you don&rsquo;t
+              have to type it.
             </p>
           </div>
         )}
@@ -391,8 +427,9 @@ export default function AddSareeForm({
         <div className="flex items-start gap-3 text-sm text-ink-soft">
           <Sparkles size={17} className="text-gold-500 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            The name, description, fabric, border and colours are written for
-            you. You only type the two prices.
+            The name, type, fabric and border are filled in for you to check.
+            For a sharper read of the border, add a close-up of it from the
+            gallery too.
           </p>
         </div>
 
@@ -478,29 +515,21 @@ export default function AddSareeForm({
         </div>
       )}
 
-      {match ? (
-        <div className="card p-4 mt-4 border-good/30 bg-good-bg/50">
-          <p className="flex items-center gap-2 text-sm text-good font-medium">
-            <ReceiptText size={15} className="shrink-0" />
-            Matched to the bill
-          </p>
-          <p className="text-sm text-ink mt-1.5 leading-relaxed">
-            “{match.itemName}”
-          </p>
-          <p className="text-xs text-ink-soft mt-1.5 leading-relaxed">
-            {match.supplier ?? 'Supplier'}
-            {match.costPrice != null &&
-              ` · cost ₹${match.costPrice.toLocaleString('en-IN')} filled in below`}
-            . Worth a glance — if this is the wrong line, clear the cost price.
-          </p>
+      {bill && bill.lines.length > 0 && (
+        <div className="mt-4">
+          <BillLinePicker
+            lines={bill.lines}
+            chosen={chosenLine}
+            suggested={suggestedLine}
+            onChoose={chooseLine}
+            intro={
+              (suggestedLine != null
+                ? 'Matched from the photo — check it, or tap the right one.'
+                : 'The photo didn’t clearly match a line. Tap the one this saree is.') +
+              ' It fills in the cost price.'
+            }
+          />
         </div>
-      ) : (
-        billId && (
-          <p className="text-sm text-ink-soft bg-canvas-warm border border-line rounded-lg px-3 py-2.5 mt-4 leading-relaxed">
-            No line on that bill matched this saree, so the details below were
-            read from the photos only.
-          </p>
-        )
       )}
 
       {previews.length > 0 && (
@@ -519,13 +548,15 @@ export default function AddSareeForm({
       <section className="card p-5 mt-6">
         <h2 className="eyebrow mb-4">Prices</h2>
 
-        <Field label="What we paid" hint="Only we see this. Used for profit.">
+        <Field label="Cost price" hint="Only we see this. Used for profit.">
           <div className="relative">
             <span className="field-prefix">₹</span>
             <input
               type="number"
               inputMode="numeric"
-              autoFocus
+              // With a bill, the first thing to do is pick its line, so the
+              // keyboard shouldn't jump up over it.
+              autoFocus={!bill}
               value={draft.cost_price}
               onChange={(e) => changeCost(e.target.value)}
               className="field field-money text-lg font-medium"
@@ -555,7 +586,7 @@ export default function AddSareeForm({
               inputMode="numeric"
               value={markup}
               onChange={(e) => changeMarkup(e.target.value)}
-              placeholder="Percent on top of what we paid"
+              placeholder="Percent on top of the cost price"
               className="field pr-9"
             />
             <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none">
@@ -577,22 +608,12 @@ export default function AddSareeForm({
           </div>
         </Field>
 
-        <Field label="How many pieces of this design?">
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={draft.quantity_total}
-            onChange={(e) => setDraft({ ...draft, quantity_total: e.target.value })}
-            className="field"
-          />
-        </Field>
       </section>
 
       <section className="card p-5 mt-4">
         <h2 className="eyebrow mb-4">Details</h2>
 
-        <Field label="Name">
+        <Field label="Name" required>
           <input
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -624,20 +645,33 @@ export default function AddSareeForm({
         </Field>
 
         <Field
-          label="Fabric"
-          flagged={uncertain.has('fabric')}
-          hint={
-            uncertain.has('fabric')
-              ? 'Hard to tell from a photo — please check'
-              : undefined
-          }
-        >
-          <input
-            value={draft.fabric}
-            onChange={(e) => setDraft({ ...draft, fabric: e.target.value })}
-            className={`field ${uncertain.has('fabric') ? 'field-flagged' : ''}`}
-          />
-        </Field>
+            label="Fabric"
+            flagged={uncertain.has('fabric')}
+            hint={uncertain.has('fabric') ? 'Hard to tell — please check' : undefined}
+          >
+            <ChoiceField
+              value={draft.fabric}
+              options={FABRICS}
+              flagged={uncertain.has('fabric')}
+              onChange={(fabric) => setDraft({ ...draft, fabric })}
+            />
+          </Field>
+
+          {/* Shown here, not only on the edit screen: a whole-saree photo
+              shows the border as a thin strip, so this is the field most
+              often worth correcting before saving. */}
+          <Field
+            label="Border"
+            flagged={uncertain.has('border')}
+            hint={uncertain.has('border') ? 'Hard to tell — please check' : undefined}
+          >
+            <ChoiceField
+              value={draft.border}
+              options={BORDERS}
+              flagged={uncertain.has('border')}
+              onChange={(border) => setDraft({ ...draft, border })}
+            />
+          </Field>
 
         <label className="flex items-center gap-3 py-1 cursor-pointer">
           <input
@@ -713,6 +747,7 @@ function marginHint(draft: {
   if (price <= 0 || cost <= 0) return undefined;
 
   const margin = price - cost;
-  if (margin <= 0) return 'This is at or below what we paid.';
+  if (margin <= 0) return 'This is at or below the cost price.';
   return `₹${margin.toLocaleString('en-IN')} on each piece.`;
 }
+

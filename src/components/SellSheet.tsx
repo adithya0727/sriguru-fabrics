@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { getBrowserClient } from '@/lib/supabase/client';
 
@@ -30,6 +30,7 @@ export default function SellSheet({
   const [receipt, setReceipt] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sold, setSold] = useState(false);
 
   const percent = Number(discount);
   const validPercent =
@@ -70,19 +71,34 @@ export default function SellSheet({
       return;
     }
 
-    onClose();
+    // Say so, briefly, before closing. Otherwise the sheet shuts and the saree
+    // vanishes from the list — which looks exactly like something going wrong.
+    setSold(true);
     router.refresh();
+    setTimeout(onClose, 1100);
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-end bg-ink/40 backdrop-blur-[2px]"
-      onClick={busy ? undefined : onClose}
+      onClick={busy || sold ? undefined : onClose}
     >
       <div
-        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto rise"
+        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 pb-(--sheet-bottom) max-h-[90vh] overflow-y-auto rise"
         onClick={(e) => e.stopPropagation()}
       >
+        {sold ? (
+          <div className="py-8 text-center" role="status">
+            <div className="mx-auto w-14 h-14 rounded-full bg-good-bg flex items-center justify-center mb-4">
+              <Check className="text-good" size={26} strokeWidth={2.5} />
+            </div>
+            <p className="font-display text-xl text-maroon-900">Sold</p>
+            <p className="text-sm text-ink-soft mt-1 tabular-nums">
+              {saree.name} · {rupees(finalPrice)}
+            </p>
+          </div>
+        ) : (
+        <>
         <div className="flex items-start justify-between mb-5">
           <div className="min-w-0">
             <p className="eyebrow mb-1">Sell</p>
@@ -113,7 +129,10 @@ export default function SellSheet({
           id="customer"
           value={customer}
           onChange={(e) => setCustomer(e.target.value)}
-          autoFocus
+          // Deliberately not focused on open: the name is optional, and the
+          // keyboard would cover the price and the Sell button for the common
+          // case of just confirming the sale.
+          placeholder="Optional"
           className="field mb-4"
         />
 
@@ -191,6 +210,8 @@ export default function SellSheet({
         <button onClick={sell} disabled={busy} className="btn btn-primary w-full">
           {busy ? 'Recording…' : `Sell for ${rupees(finalPrice)}`}
         </button>
+        </>
+        )}
       </div>
     </div>
   );

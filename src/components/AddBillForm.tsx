@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Camera, Images, AlertCircle, ScanLine } from 'lucide-react';
 import { getBrowserClient } from '@/lib/supabase/client';
@@ -39,6 +39,9 @@ export default function AddBillForm({ companies }: { companies: BillCompany[] })
   const [draft, setDraft] = useState<BillDraft | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // The preview is an object URL; release it when replaced or on leaving.
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -210,7 +213,7 @@ export default function AddBillForm({ companies }: { companies: BillCompany[] })
           <p className="font-display text-lg">Reading the bill</p>
         </div>
         <p className="text-sm text-ink-soft mt-2">
-          This takes about fifteen seconds.
+          This takes about ten seconds.
         </p>
       </div>
     );

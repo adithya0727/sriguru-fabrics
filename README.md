@@ -60,7 +60,7 @@ npm run dev
 ## Stack
 
 Next.js 16 (App Router) · Supabase (Postgres, Storage, Auth) · Tailwind 4 ·
-Claude Haiku 4.5 for reading saree photos and supplier bills.
+Claude Opus 5.5 for reading supplier bills and Sonnet 5.5 for saree photos.
 
 Server-rendered per request, which is what generates the WhatsApp preview cards
 and keeps shared links honest.

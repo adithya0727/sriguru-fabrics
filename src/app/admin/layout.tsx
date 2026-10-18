@@ -12,7 +12,7 @@ export default function AdminLayout({
 
       {/* Bottom bar: this is used one-handed, standing at the rack, so the
           controls live where a thumb already is. */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-surface/92 backdrop-blur-md border-t border-line">
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-surface/92 backdrop-blur-md border-t border-line pb-(--nl-badge-clearance)">
         <div className="max-w-lg mx-auto grid grid-cols-4">
           <NavItem href="/admin" icon={<Package size={19} />} label="Stock" />
           <NavItem href="/admin/add" icon={<Plus size={19} />} label="Add saree" primary />

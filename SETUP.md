@@ -125,26 +125,29 @@ test with a fresh saree link rather than assuming it's broken.
 
 ## What the AI costs
 
-Both readers run on `claude-haiku-4-5`, the cheapest model with vision.
-Measured, not estimated:
+Two readers, each on the model that measured best on her own photos:
 
-| | Per use | Where the model is set |
-|---|---|---|
-| Tagging a saree | ~$0.005 | `MODEL` in `src/lib/tagger-core.ts` |
-| Reading a bill | ~$0.007 | `MODEL` in `src/lib/receipt-core.ts` |
+| | Model | Per use | Typical time | Where it's set |
+|---|---|---|---|---|
+| Reading a bill | `claude-opus-5-5`, low effort | ~₹1–4 | 4–13s | `MODEL` in `src/lib/receipt-core.ts` |
+| Tagging a saree | `claude-sonnet-5-5`, medium effort | ~₹0.5–1.6 | ~3s | `MODEL` in `src/lib/tagger-core.ts` |
 
-That is about **₹0.5 each**, so $5 of credit covers roughly a thousand of them.
+Roughly ₹100 a month at the current pace.
 
-If bills come out misread — handwriting and faint thermal print are where Haiku
-is weakest — change that one `MODEL` line to `claude-sonnet-5`. It costs about
-twice as much and is markedly better on messy input.
+Both were chosen by testing on real data, not by reputation. On her own bills,
+the previous model (Haiku 4.5) named none of the items on a handwritten bill
+correctly and filed it in the wrong month; Opus 5.5 read every number right. On
+40 of her sarees, Haiku matched the wrong bill line about four times in ten —
+silently writing a wrong cost price — while Sonnet 5.5 never picked a wrong
+line at all.
 
-**If you move either to a Claude 5 model, note what had to be removed for
-Haiku:** adaptive thinking (`thinking: {type: 'adaptive'}`) is 4.6+ only, and
-`output_config.effort` is rejected outright by Haiku 4.5. Both can come back on
-a Claude 5 model; neither may be present while the model is Haiku.
+**Photo size matters as much as the model.** Bills are sent at 2576px on the
+long edge and sarees at 1280px, because that is what these models can actually
+use: at 2576px a bill gives the model about four and a half times the detail
+the app used to send. Sending a newer model a small photo throws most of the
+improvement away.
 
-Photos are sent at the size that actually helps and no larger. Sarees go at
-768px, where accuracy plateaus. Bills go at 1024px, because small digits need
-the detail — and no higher, because the API caps images near 1.19 megapixels,
-so a bigger upload is resized away before the model ever sees it.
+**If you change either model**, re-measure rather than assume. Both now use
+`thinking: {type: 'adaptive'}` and `output_config.effort`; Opus 5.5 and Sonnet
+5.5 always think and reject turning it off, while older Haiku 4.5 rejected
+both settings outright.

@@ -24,9 +24,20 @@
  * this is the reachable one.
  */
 
-/** WhatsApp accepts more, but the wait to prepare them grows with every one,
- *  and an album past this size stops being browsable anyway. */
-export const MAX_SHARE_PHOTOS = 10;
+/**
+ * How many photos go in one share — WhatsApp's own limit per message.
+ *
+ * This used to be 10, on the theory that a longer album stops being
+ * browsable. That was the wrong call: a whole type is exactly what someone
+ * asks to see, and quietly sending a quarter of it looked like a bug. A type
+ * larger than this is sent in batches rather than truncated.
+ */
+export const PHOTOS_PER_SEND = 100;
+
+/** Photos prepared at once. Enough to overlap the downloads, few enough that
+ *  a mid-range phone is not holding a dozen full-size canvases at the same
+ *  time. Order is preserved regardless of which finishes first. */
+const PREPARE_AT_ONCE = 4;
 
 /** Wide enough to judge a border, small enough to prepare over mobile data.
  *  Must be one of Next's configured image widths or the optimiser rejects it. */
@@ -97,6 +108,43 @@ export async function sharePhotos(files: File[], text: string): Promise<boolean>
     if (error instanceof DOMException && error.name === 'AbortError') return false;
     throw error;
   }
+}
+
+/**
+ * Prepare a whole album, a few photos at a time, in the order given.
+ *
+ * One photo that will not load is left out rather than failing the album:
+ * forty sarees should not go unsent because one image is unreachable. The
+ * caller is told how many were dropped so it can say so.
+ */
+export async function prepareAlbum(
+  items: { photoUrl: string; label: string; fileName: string }[],
+  onProgress: (done: number, total: number) => void,
+): Promise<{ files: File[]; failed: number }> {
+  const results: (File | null)[] = new Array(items.length).fill(null);
+  let next = 0;
+  let done = 0;
+  let failed = 0;
+
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      const item = items[i];
+      try {
+        results[i] = await buildLabelledPhoto(item.photoUrl, item.label, item.fileName);
+      } catch {
+        failed++;
+      }
+      done++;
+      onProgress(done, items.length);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(PREPARE_AT_ONCE, items.length) }, worker),
+  );
+
+  return { files: results.filter((f): f is File => f !== null), failed };
 }
 
 // ---------------------------------------------------------------------------

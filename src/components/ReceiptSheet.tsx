@@ -135,7 +135,7 @@ export default function ReceiptSheet({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 max-h-[92vh] overflow-y-auto rise"
+        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 pb-(--sheet-bottom) max-h-[92vh] overflow-y-auto rise"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-4">

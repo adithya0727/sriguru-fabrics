@@ -4,20 +4,21 @@ import { z } from 'zod';
 import { STANDARD_COLUMNS } from './bills';
 
 /**
- * The model that reads bills.
+ * The model that reads bills: Opus 5.5, at low effort.
  *
- * Deliberately one constant: Haiku 4.5 is the cheapest vision model (~$0.007 a
- * bill), and it is also the weakest at handwriting and thermal print, which is
- * what a lot of saree bills are. Judge it on real bills, and if it misreads
- * them, change this line — `claude-sonnet-5` costs about twice as much and is
- * markedly better at messy input.
+ * Chosen on her own bills, not on a demo. Against four real ones — a
+ * handwritten Gadwal estimate, a notebook page photographed sideways, a
+ * printed GST invoice and a 22-line wholesale bill — Haiku 4.5 named none of
+ * the four items on the handwritten bill correctly and put it in the wrong
+ * month; Opus 5.5 read every number right, read printed shop names letter for
+ * letter (Haiku had split one supplier into three), and flagged the single
+ * row that did not add up. It took 3-13s, no slower than Haiku had been.
  *
- * NOTE: Haiku 4.5 rejects two things the saree tagger used to send. Adaptive
- * thinking is 4.6+ only, and `output_config.effort` errors outright here. If
- * you move this to a Claude 5 model you can add them back; while it points at
- * Haiku, leave them off.
+ * Effort stays low on purpose. Medium was no more accurate here and added a
+ * few seconds, and every second counts against the host's request limit.
+ * Opus 5.5 always thinks, so adaptive thinking is not optional for it.
  */
-const MODEL = 'claude-haiku-4-5';
+const MODEL = 'claude-opus-5-5';
 
 /** A label/value pair. Used for a bill's own columns and for its totals rows,
  *  both of which vary per supplier and so cannot be fixed fields. */
@@ -78,9 +79,10 @@ const ReceiptSchema = z.object({
   low_confidence: z
     .array(z.string())
     .describe(
-      'Anything you could not read confidently, named so a person can check ' +
-        'it — for example "row 3 rate" or "bill_date". Be honest: a flagged ' +
-        'guess costs a glance, an unflagged wrong number corrupts the books.',
+      'Cells you genuinely could not read, named so a person can check them — ' +
+        'e.g. "row 3 rate" or "bill_date". Only real doubt: never a cell you ' +
+        'then confirmed, and never commentary. An unflagged wrong number ' +
+        'corrupts the books; a needless flag teaches people to ignore flags.',
     ),
 });
 
@@ -105,11 +107,39 @@ Read every date that way when converting to yyyy-mm-dd. When both numbers are
 12 or under the order cannot be proved from the page, so convert it as
 day/month and name "bill_date" in low_confidence so a person confirms it.
 
+Handwritten dates often use upright strokes as separators, and a stroke looks
+exactly like the digit 1: "18|1|25" is 18 January 2025, not 18 November. Count
+the strokes against the digits before deciding, and if a stroke could be a
+separator or a 1, flag "bill_date" — a wrong month files the bill in the wrong
+season and nobody notices.
+
+THE PHOTO MAY BE SIDEWAYS
+Bills are often photographed at an angle, turned 90 degrees, or upside down,
+and some are a page torn from a notebook. Read the text in whichever direction
+it actually runs. A rotated page is not an unreadable one.
+
+THE SHOP NAME
+Usually printed at the top, but on handwritten estimates it may be written in
+by hand, sometimes in brackets beside a place name. Copy it letter for letter
+— the same shop read two slightly different ways becomes two separate
+suppliers in the books, so check every letter of a printed name.
+
 COPY, DO NOT INTERPRET
 Transcribe what is printed. Keep the seller's own wording and spelling for
 item names, and keep numbers exactly as written — do not convert "1,250.00"
 to 1250, do not add currency symbols, do not recompute a total you think is
 wrong. A person is checking this against the paper, so it has to match it.
+
+Handwritten bills abbreviate. Where a line is shorthand and its full name is
+written nearby — a heading above it, a note beside it — give both: the line as
+written, then the full name in brackets, e.g. "MGLR (MANGALGIRI)". If there is
+no full name on the page, give the line as written and nothing more; never
+expand an abbreviation from your own knowledge.
+
+USE THE ARITHMETIC
+On most bills quantity × rate = amount, and the amounts add up to the total.
+When a digit is hard to read, let that relationship decide it. A row whose
+three numbers agree is confirmed; do not flag it.
 
 ONLY THE COLUMNS THIS BILL HAS
 Bills differ. Report only the columns actually present on this one. If there
@@ -117,18 +147,23 @@ is no unit column, leave unit out of the columns list and null on every row.
 Never invent a column, and never pad a row with a value that is not printed.
 
 WHAT YOU CANNOT READ
-Some of these are hard to read, and a plausible wrong digit is worse than an
-admitted gap. If a figure is unclear, give your best reading and name that
-cell in low_confidence. If a cell is genuinely blank, leave it null.
+A plausible wrong digit is worse than an admitted gap. If something is
+genuinely unclear, give your best reading and name that cell in
+low_confidence. If a cell is blank, leave it null.
+
+Flag only real doubt. A person reads every flag, so each one must be worth
+their attention: do not flag something you then confirmed, do not flag a row
+because the handwriting is untidy if you read it with confidence, and do not
+add commentary. Name the cell and nothing else — "row 2 rate", "bill_date".
 `.trim();
 
 /**
  * Read one photographed bill.
  *
- * @param image base64 JPEG, downscaled by the caller to about 1024px wide.
- *   The API caps images near 1.19 megapixels, so anything larger is resized
- *   away before the model sees it — bigger uploads buy no extra legibility,
- *   only slower uploads on a phone.
+ * @param image base64 JPEG, about 2576px on its long edge. That is where
+ *   Opus 5.5 stops taking in more detail (measured: ~4,750 image tokens there,
+ *   against ~1,050 at the 1024px this used to send). Small handwritten digits
+ *   are exactly what the extra resolution is for.
  */
 export async function readReceipt(image: {
   base64: string;
@@ -138,8 +173,11 @@ export async function readReceipt(image: {
 
   const response = await client.messages.parse({
     model: MODEL,
-    max_tokens: 8000,
-    output_config: { format: zodOutputFormat(ReceiptSchema) },
+    // Room for its thinking plus a long bill — the 22-line one ran to ~1,700
+    // output tokens.
+    max_tokens: 16000,
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'low', format: zodOutputFormat(ReceiptSchema) },
     system: [
       {
         type: 'text',
@@ -166,12 +204,18 @@ export async function readReceipt(image: {
     ],
   });
 
+  // A declined request returns successfully with no content; say so plainly
+  // rather than surfacing it as an empty bill.
+  if (response.stop_reason === 'refusal') {
+    throw new Error('This photo could not be read. Enter the details by hand.');
+  }
   const parsed = response.parsed_output;
   if (!parsed) {
     throw new Error('Could not read this bill. Enter the details by hand.');
   }
 
-  // Haiku 4.5 pricing: $1 / $5 per million tokens.
+  // Opus 5.5 pricing, per million tokens: $4 in, $20 out (thinking included),
+  // cache reads $0.20, cache writes $5.
   const usage = response.usage;
   const inputTokens =
     usage.input_tokens +
@@ -184,10 +228,10 @@ export async function readReceipt(image: {
       inputTokens,
       outputTokens: usage.output_tokens,
       estimatedCostUsd:
-        (usage.input_tokens * 1 +
-          (usage.cache_read_input_tokens ?? 0) * 0.1 +
-          (usage.cache_creation_input_tokens ?? 0) * 1.25 +
-          usage.output_tokens * 5) /
+        (usage.input_tokens * 4 +
+          (usage.cache_read_input_tokens ?? 0) * 0.2 +
+          (usage.cache_creation_input_tokens ?? 0) * 5 +
+          usage.output_tokens * 20) /
         1_000_000,
     },
   };

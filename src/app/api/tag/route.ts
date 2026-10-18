@@ -6,10 +6,13 @@ import { type BillItem, parseAmount } from '@/lib/bills';
 export const maxDuration = 60;
 
 const MAX_IMAGES = 3;
-const MAX_BASE64_BYTES = 1_500_000; // ~1.1MB of image; a 768px JPEG is far under
+const MAX_BASE64_BYTES = 1_500_000; // ~1.1MB of image; a 1280px JPEG is ~0.35MB
 
 /** What a matched bill line fills in on the saree. */
 type Match = {
+  /** 1-based position of the line on the bill, so the form can show it as
+   *  the selected choice among the others. */
+  lineNumber: number;
   billId: string;
   itemName: string;
   costPrice: number | null;
@@ -130,10 +133,11 @@ function resolveMatch(bill: BillRow | null, number: number | null): Match | null
     : bill.bill_companies;
 
   return {
+    lineNumber: number,
     billId: bill.id,
     itemName: item.description,
     costPrice: parseAmount(item.rate),
-    quantity: parseAmount(item.quantity),
+    quantity: parseAmount(item.quantity, 'quantity'),
     supplier: company?.name ?? null,
     purchasedOn: bill.bill_date,
   };

@@ -26,6 +26,7 @@ export const FABRICS = [
 ] as const;
 
 export const BORDERS = [
+  'small border',
   'bentex border',
   'temple border',
   'zari border',

@@ -7,8 +7,9 @@ import imageCompression from 'browser-image-compression';
  *
  *  - `display`: what customers see. Big enough to judge a border, small enough
  *    to load on a patchy mobile connection.
- *  - `forTagging`: sent to the model. Accuracy plateaus around 768px, so
- *    anything larger is money spent per upload for no gain.
+ *  - `forTagging`: sent to the model, at 1280px on the long edge. Matched
+ *    against her own sarees, 1280px with medium effort found the right bill
+ *    line more often than 768px did, without ever choosing a wrong one.
  */
 export async function prepareSareePhoto(file: File): Promise<{
   display: File;
@@ -24,11 +25,11 @@ export async function prepareSareePhoto(file: File): Promise<{
   });
 
   const small = await imageCompression(file, {
-    maxWidthOrHeight: 768,
-    maxSizeMB: 0.15,
+    maxWidthOrHeight: 1280,
+    maxSizeMB: 0.35,
     useWebWorker: true,
     fileType: 'image/jpeg',
-    initialQuality: 0.75,
+    initialQuality: 0.78,
   });
 
   return {
@@ -53,15 +54,14 @@ function toBase64(file: File): Promise<string> {
 /**
  * A photographed bill, prepared for reading.
  *
- * Kept at 1024px rather than the 768px used for sarees. The two are judged
- * differently: a saree is judged on colour and weave, which survives being
- * small, while a bill is judged on six-point digits, which does not. Measured,
- * 768px costs 1,058 input tokens and 1024px costs 1,586 — half again more
- * detail for a fraction of a paisa.
+ * Sent at 2576px on the long edge, because that is where the reading model
+ * stops taking in more detail — measured on one of her own handwritten bills,
+ * about 4,750 image tokens there against 1,050 at 1024px. Small handwritten
+ * digits are exactly what that detail is for.
  *
- * There is no point going higher. The API caps images near 1.19 megapixels, so
- * a 1568px photo is resized back down before the model sees it: identical
- * token cost, identical legibility, 245KB more to upload from a phone.
+ * This used to be 1024px, with a comment claiming 1024px *wide* — but the
+ * limit is on the long edge, so a portrait bill actually went out at 768x1024,
+ * less than even the old model could use. Measure the long edge, not the width.
  */
 export async function prepareBillPhoto(file: File): Promise<{
   display: File;
@@ -77,13 +77,14 @@ export async function prepareBillPhoto(file: File): Promise<{
   });
 
   // Quality kept high: JPEG artefacts land hardest on small text, which is
-  // the only thing on the page that matters.
+  // the only thing on the page that matters. ~1-1.6MB, a second or two to
+  // upload on 4G — the price of the model seeing the digits clearly.
   const forReading = await imageCompression(file, {
-    maxWidthOrHeight: 1024,
-    maxSizeMB: 0.4,
+    maxWidthOrHeight: 2576,
+    maxSizeMB: 1.6,
     useWebWorker: true,
     fileType: 'image/jpeg',
-    initialQuality: 0.88,
+    initialQuality: 0.86,
   });
 
   return {

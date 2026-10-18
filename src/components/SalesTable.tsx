@@ -171,7 +171,7 @@ export default function SalesTable({ sales }: { sales: SaleRow[] }) {
       {picking && (
         // Sits clear of the tab bar rather than over it — the way out of this
         // mode must never be the thing a thumb covers.
-        <div className="fixed inset-x-0 bottom-16 z-40 px-5">
+        <div className="fixed inset-x-0 bottom-[calc(4rem+var(--nl-badge-clearance))] z-40 px-5">
           <div className="max-w-lg mx-auto card shadow-lg p-3">
             {sameNameOutstanding.length > 0 && (
               <button
@@ -334,7 +334,7 @@ function SaleSheet({
       onClick={busy ? undefined : onClose}
     >
       <div
-        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto rise"
+        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 pb-(--sheet-bottom) max-h-[90vh] overflow-y-auto rise"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-5">
@@ -423,7 +423,7 @@ function SaleSheet({
               />
             </div>
           </Row>
-          <Row label="What we paid">
+          <Row label="Cost price">
             <div className="relative">
               <span className="field-prefix">₹</span>
               <input

@@ -14,17 +14,21 @@ import {
 import type { TaggedAttributes } from './types';
 
 /**
- * Haiku 4.5 — about a fifth of what Opus 5 cost per saree (~$0.024 to ~$0.005).
+ * Sonnet 5.5 at medium effort — a step below the bill reader, as asked, and
+ * chosen on her own sarees.
  *
- * The trade is judgement: it is weaker at the genuinely hard calls, above all
- * telling pure silk from semi silk in a photograph. That is what low_confidence
- * is for, and every listing is reviewed by a person before it goes out.
+ * Graded against 40 sarees, using the line her own cost price points to as
+ * the right answer (each line on those bills has a distinct rate). On the 28
+ * not used for tuning, Haiku 4.5 matched 4 correctly and 11 to the WRONG line
+ * — silently writing a wrong cost price each time — and crashed outright on 2,
+ * which is what left sarees saved as "Untitled saree". Sonnet 5.5 matched 15
+ * correctly and never once chose a wrong line: when it is unsure it answers
+ * "no match", and the form then asks her to pick. Median 3s, against Haiku's 6.
  *
- * Haiku 4.5 also rejects two parameters a Claude 5 model accepts — adaptive
- * thinking (4.6+ only) and `output_config.effort` (errors here). Both were
- * removed below. Put them back if this ever points at a Claude 5 model again.
+ * Medium effort and a 1280px photo were the best of the configurations tried;
+ * low effort found fewer matches, and medium on a 768px photo made a mistake.
  */
-const MODEL = 'claude-haiku-4-5';
+const MODEL = 'claude-sonnet-5-5';
 
 const BASE_SHAPE = {
   name: z
@@ -152,8 +156,10 @@ export async function tagSareePhotos(
 
   const response = await client.messages.parse({
     model: MODEL,
-    max_tokens: 2000,
+    max_tokens: 8000,
+    thinking: { type: 'adaptive' },
     output_config: {
+      effort: 'medium',
       format: zodOutputFormat(matching ? MatchedTagSchema : TagSchema),
     },
     system: [
@@ -199,12 +205,16 @@ export async function tagSareePhotos(
     ],
   });
 
+  if (response.stop_reason === 'refusal') {
+    throw new Error('These photos could not be read. Enter the details by hand.');
+  }
   const parsed = response.parsed_output;
   if (!parsed) {
     throw new Error('The tagger could not read these photos. Enter details manually.');
   }
 
-  // Haiku 4.5 pricing: $1 / $5 per million tokens.
+  // Sonnet 5.5 pricing, per million tokens: $2 in, $10 out (thinking
+  // included), cache reads $0.10, cache writes $2.50.
   const inputTokens =
     response.usage.input_tokens +
     (response.usage.cache_read_input_tokens ?? 0) +
@@ -224,10 +234,10 @@ export async function tagSareePhotos(
       inputTokens,
       outputTokens,
       estimatedCostUsd:
-        (response.usage.input_tokens * 1 +
+        (response.usage.input_tokens * 2 +
           (response.usage.cache_read_input_tokens ?? 0) * 0.1 +
-          (response.usage.cache_creation_input_tokens ?? 0) * 1.25 +
-          outputTokens * 5) /
+          (response.usage.cache_creation_input_tokens ?? 0) * 2.5 +
+          outputTokens * 10) /
         1_000_000,
     },
   };

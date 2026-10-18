@@ -52,6 +52,10 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
+// Only where a login matters. This used to run on every request — so each
+// customer opening a saree link paid for a Supabase round trip whose answer
+// public pages never use. The admin and the two readers are the only places a
+// session is read, and :path* also matches the bare /admin.
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)'],
+  matcher: ['/admin/:path*', '/api/:path*'],
 };

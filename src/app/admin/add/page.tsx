@@ -37,7 +37,12 @@ export default async function AddPage() {
       company: company?.name ?? 'Unknown shop',
       billNumber: b.bill_number,
       billDate: b.bill_date,
-      itemCount: b.items?.length ?? 0,
+      // The lines travel to the form so she can tap the one a saree is. The
+      // reader still matches on the server from the bill id alone.
+      lines: (b.items ?? []).map((item) => ({
+        description: item.description,
+        rate: item.rate,
+      })),
     };
   });
 

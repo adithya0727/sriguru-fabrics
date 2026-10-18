@@ -331,8 +331,8 @@ export default function StockList({
                             margin > 0 ? 'text-good' : 'text-bad'
                           }`}
                         >
-                          {margin > 0 ? '+' : ''}
-                          {margin.toLocaleString('en-IN')} margin
+                          {margin > 0 ? '+' : '−'}₹
+                          {Math.abs(margin).toLocaleString('en-IN')} profit
                         </span>
                       )}
                     </div>

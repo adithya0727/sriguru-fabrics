@@ -7,6 +7,8 @@ import {
   blankItem,
   cellValue,
   columnLabel,
+  parseAmount,
+  rowArithmetic,
   withCellValue,
 } from '@/lib/bills';
 
@@ -68,32 +70,45 @@ export default function BillTable({
             </tr>
           </thead>
           <tbody>
-            {items.map((item, i) => (
-              <tr
-                key={i}
-                onClick={() => setEditing(i)}
-                className="border-b border-line cursor-pointer hover:bg-canvas-warm/60 transition-colors"
-              >
-                {columns.map((c) => {
-                  const value = cellValue(item, c);
-                  return (
-                    <td
-                      key={c}
-                      className={`px-3 py-2.5 first:pl-5 last:pr-5 align-top ${
-                        c === 'description'
-                          ? 'text-ink min-w-[10rem]'
-                          : 'text-ink-soft whitespace-nowrap tabular-nums'
-                      }`}
-                    >
-                      {value || <span className="text-ink-faint">—</span>}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {items.map((item, i) => {
+              const sum = rowArithmetic(item);
+              const off = sum != null && !sum.ok;
+              return (
+                <tr
+                  key={i}
+                  onClick={() => setEditing(i)}
+                  className="border-b border-line cursor-pointer hover:bg-canvas-warm/60 transition-colors"
+                >
+                  {columns.map((c) => {
+                    const value = cellValue(item, c);
+                    const flagAmount = off && c === 'amount';
+                    return (
+                      <td
+                        key={c}
+                        className={`px-3 py-2.5 first:pl-5 last:pr-5 align-top ${
+                          c === 'description'
+                            ? 'text-ink min-w-[10rem]'
+                            : `whitespace-nowrap tabular-nums ${flagAmount ? 'text-bad font-medium' : 'text-ink-soft'}`
+                        }`}
+                      >
+                        {value || <span className="text-ink-faint">—</span>}
+                        {flagAmount && <span aria-label="does not add up"> ⚠</span>}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {items.some((item) => rowArithmetic(item)?.ok === false) && (
+        <p className="text-xs text-bad mt-2.5 leading-relaxed">
+          ⚠ marks a row where quantity × rate isn&rsquo;t the amount — usually a
+          misread digit. Tap it to check against the paper.
+        </p>
+      )}
 
       <button
         onClick={() => {
@@ -160,7 +175,7 @@ function RowSheet({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto rise"
+        className="w-full max-w-lg mx-auto bg-surface rounded-t-2xl p-5 pb-(--sheet-bottom) max-h-[90vh] overflow-y-auto rise"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-5">
@@ -203,6 +218,26 @@ function RowSheet({
             </div>
           );
         })}
+
+        {(() => {
+          // Worked out live as she corrects a digit, so she can see the row
+          // come right rather than taking it on trust.
+          const sum = rowArithmetic(draft);
+          if (!sum) return null;
+          const fmt = (n: number) => n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+          const q = parseAmount(draft.quantity, 'quantity') ?? 0;
+          const r = parseAmount(draft.rate) ?? 0;
+          return (
+            <p
+              className={`text-sm tabular-nums rounded-lg px-3 py-2.5 mb-3 ${
+                sum.ok ? 'text-good bg-good-bg' : 'text-bad bg-bad-bg'
+              }`}
+            >
+              {fmt(q)} × {fmt(r)} = {fmt(sum.expected)}
+              {sum.ok ? ' ✓ adds up' : ` — but the amount says ${draft.amount}`}
+            </p>
+          );
+        })()}
 
         <button onClick={() => onSave(draft)} className="btn btn-primary w-full mt-2">
           Done
